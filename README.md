@@ -83,5 +83,5 @@ bc1qhxxgy52s2ps9j2gyzfxtykccrrpkzpu9uvnhhe
 ```
 - Litecoin
 ```
-0x5da0a849D04085C7F1943871F469cb77394aa84b
+ltc1q8fu7j3zyckl0w4e6m2q85xc69ywvtpnjzdjhvq
 ```
