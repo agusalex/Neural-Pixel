@@ -1,0 +1,100 @@
+#include <gtk/gtk.h>
+#include <string.h>
+#include "file_utils.h"
+#include "str_utils.h"
+#include "structs.h"
+#include "widgets_cb.h"
+
+static void factory_setup_cb (GtkListItemFactory *factory, GtkListItem *list_item, gpointer user_data)
+{
+	GtkWidget *label = gtk_label_new(NULL);
+	gtk_list_item_set_child (list_item, label);
+}
+
+static void factory_bind_cb (GtkListItemFactory *factory, GtkListItem *list_item, gpointer user_data)
+{
+	GtkLabel *label;
+	GtkStringObject *string_object;
+	const gchar *string;
+
+	string_object = GTK_STRING_OBJECT(gtk_list_item_get_item(list_item));
+	string = gtk_string_object_get_string(string_object);
+	label = GTK_LABEL(gtk_list_item_get_child(list_item));
+	gtk_widget_set_halign(GTK_WIDGET(label), GTK_ALIGN_START);
+	gtk_widget_set_hexpand (GTK_WIDGET(label), FALSE);
+	size_t length = 28;
+
+	size_t truncated_length = length;
+
+	if (strlen(string) < length) {
+		truncated_length = strlen(string);
+		char *shortened_string = g_malloc(truncated_length + 1);
+		strncpy(shortened_string, string, truncated_length);
+		shortened_string[truncated_length] = '\0';
+		gtk_label_set_text(label, shortened_string);
+		g_free(shortened_string);
+	} else {
+		char *shortened_string = g_malloc(truncated_length + 4);
+		strncpy(shortened_string, string, truncated_length);
+		strcpy(shortened_string + truncated_length, "...");
+		shortened_string[truncated_length + 3] = '\0';
+		gtk_label_set_text(label, shortened_string);
+		g_free(shortened_string);
+	}
+}
+
+GtkWidget* gen_const_dd(const char** items, int *def_item)
+{
+	GtkWidget* dd = gtk_drop_down_new_from_strings(items);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), *def_item);
+	g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_const_item), def_item);
+	g_signal_connect(dd, "destroy", G_CALLBACK(on_dropdown_destroy), NULL);
+	return dd;
+}
+
+GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, int tb_type, int *var, GtkWidget *gen_btn, int is_req)
+{
+	const char**dd_items = get_files(path);
+
+	GtkListItemFactory* fact = gtk_signal_list_item_factory_new();
+	GtkStringList* my_list = gtk_string_list_new(dd_items);
+	g_signal_connect (fact, "setup", G_CALLBACK (factory_setup_cb), NULL);
+	g_signal_connect (fact, "bind", G_CALLBACK (factory_bind_cb), NULL);
+
+	GtkSingleSelection *l_selection = GTK_SINGLE_SELECTION(gtk_single_selection_new(G_LIST_MODEL(my_list)));
+	gtk_single_selection_set_model(l_selection, G_LIST_MODEL(my_list));
+	GtkWidget* dd = gtk_drop_down_new(G_LIST_MODEL(l_selection), NULL);
+	gtk_drop_down_set_factory(GTK_DROP_DOWN(dd), fact);
+
+	if (tb != NULL) {
+		DropDownPathData *data = g_new0 (DropDownPathData, 1);
+		data->tb_type = tb_type;
+		data->textbuffer = tb;
+		g_signal_connect(dd, "notify::selected-item", G_CALLBACK(add_dropdown_selected_item_textview), data);
+		g_signal_connect(dd, "destroy", G_CALLBACK(on_dropdown_destroy), NULL);
+		gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), 0);
+	} else {
+		DropDownConstData *data = g_new0 (DropDownConstData, 1);
+		data->var = var;
+		data->req_int = is_req;
+		data->g_btn = gen_btn;
+		g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_item), data);
+		if (is_req == 1) {
+			if (*var == 0) {
+				gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a model.");
+				gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
+			} else {
+				gtk_button_set_label (GTK_BUTTON(gen_btn), "Generate");
+				gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), TRUE);
+			}
+		}
+		g_signal_connect(dd, "destroy", G_CALLBACK(on_dropdown_destroy), NULL);
+		gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), *var);
+	}
+
+	for (int i = 0; dd_items[i] != NULL; i++) {
+		free((char*)dd_items[i]);
+	}
+	free(dd_items); 
+	return dd;
+}

@@ -1,0 +1,17 @@
+/* resources/styles.css */
+
+#gen_btn {
+  color: white;
+}
+
+#gen_btn:disabled {
+  color: orange;
+}
+
+#image_window {
+  background-color: #111111;
+}
+
+#item_lab {
+  font-family: JetBrains Mono, monospace;
+}
