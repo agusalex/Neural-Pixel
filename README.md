@@ -49,6 +49,11 @@ If you want to see errors and details, start the application from a terminal and
 Download the Windows bundle in the releases tab, extract it and run the "neural_pixel.bat" file.
 You can directly run the "neural pixel" binary, but the variable that defines the dark theme will not be applied, so the app may look weird.
 
+## Recommended checkpoints
+
+- For realistic style: [photon](https://huggingface.co/sam749/Photon-v1/blob/main/photon_v1.safetensors).
+- For anime style [sotemix](https://civitai.com/models/72182/sotemix).
+
 ## Build
 
 You'll need GTK 4 and libpng development libs, then just git clone this repository and run:
