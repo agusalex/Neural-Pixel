@@ -92,6 +92,7 @@ typedef struct {
 	GtkWidget *image_widget;
 	GtkWidget *show_img_btn;
 	GtkWidget *halt_btn;
+	GtkWidget *win;
 	GString *img2img_file_path;
 } GenerationData;
 
@@ -99,8 +100,15 @@ typedef struct {
 	int verbose_bool;
 	GtkWidget *button;
 	int sdpid;
-	GDataInputStream *pipe_stream;
-} HandleOutputData;
+	GDataInputStream *out_pipe_stream;
+} SDProcessOutputData;
+
+typedef struct {
+	int verbose_bool;
+	GtkWidget *win;
+	int sdpid;
+	GDataInputStream *err_pipe_stream;
+} SDProcessErrorData;
 
 typedef struct {
 	GtkWidget *win;

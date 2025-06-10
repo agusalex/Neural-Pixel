@@ -583,6 +583,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->image_widget = preview_img;
 	gen_d->show_img_btn = hide_img_btn;
 	gen_d->halt_btn = sd_halt_btn;
+	gen_d->win = win;
 	gen_d->img2img_file_path = app_data->img2img_file_path;
 	g_signal_connect (generate_btn, "clicked", G_CALLBACK (generate_cb), gen_d);
 
