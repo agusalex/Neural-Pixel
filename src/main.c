@@ -87,7 +87,7 @@ app_activate (GApplication *app, gpointer user_data)
 	GenerationData *gen_d;
 	PreviewImageData *preview_d;
 	LoadPNGData *load_png_info_d;
-	LoadImg2ImgData *load_img_file_d;
+	LoadImg2ImgData *load_img2img_file_d;
 	//End defining GTK Widgets;
 
 	win = gtk_application_window_new (GTK_APPLICATION (app));
@@ -496,6 +496,7 @@ app_activate (GApplication *app, gpointer user_data)
 	reload_d->lora_dd = lora_dd;
 	reload_d->embedding_dd = embedding_dd;
 	g_signal_connect (reload_btn, "clicked", G_CALLBACK (reload_dropdown), reload_d);
+	g_signal_connect (reload_btn, "destroy", G_CALLBACK (on_reload_btn_destroy), reload_d);
 
 	reset_d = g_new0 (ResetCbData, 1);
 	reset_d->pos_tb = pos_tb;
@@ -525,11 +526,13 @@ app_activate (GApplication *app, gpointer user_data)
 	reset_d->cnet_check = cnet_check;
 	reset_d->vae_check = vae_check;
 	reset_d->flash_check = flash_check;
-	g_signal_connect (reset_default_btn, "clicked", G_CALLBACK (reset_view_callback), reset_d);
+	g_signal_connect (reset_default_btn, "clicked", G_CALLBACK (reset_default_btn_cb), reset_d);
+	g_signal_connect (reset_default_btn, "destroy", G_CALLBACK (on_reset_default_btn_destroy), reset_d);
 
 	preview_d = g_new0 (PreviewImageData, 1);
 	preview_d->image_widget = preview_img;
-	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (toggle_image_visibility), preview_d);
+	g_signal_connect (hide_img_btn, "clicked", G_CALLBACK (hide_img_btn_cb), preview_d);
+	g_signal_connect (hide_img_btn, "destroy", G_CALLBACK (on_hide_img_btn_destroy), preview_d);
 
 	load_png_info_d = g_new0 (LoadPNGData, 1);
 	load_png_info_d->win = win;
@@ -543,14 +546,16 @@ app_activate (GApplication *app, gpointer user_data)
 	load_png_info_d->model_dd = model_dd;
 	load_png_info_d->sample_dd = sample_dd;
 	load_png_info_d->schedule_dd = schedule_dd;
-	g_signal_connect (load_from_img_btn, "clicked", G_CALLBACK (open_png_dialog), load_png_info_d);
+	g_signal_connect (load_from_img_btn, "clicked", G_CALLBACK (load_from_img_btn_cb), load_png_info_d);
+	g_signal_connect (load_from_img_btn, "destroy", G_CALLBACK (on_load_from_img_btn_destroy), load_png_info_d);
 	
-	load_img_file_d = g_new0 (LoadImg2ImgData, 1);
-	load_img_file_d->win = win;
-	load_img_file_d->image_wgt = preview_img;
-	load_img_file_d->img2img_file_path = app_data->img2img_file_path;
-	g_signal_connect (load_img2img_btn, "clicked", G_CALLBACK (get_img_path_dialog), load_img_file_d);
-	g_signal_connect (clear_img2img_btn, "clicked", G_CALLBACK (clear_img2img_path), load_img_file_d);
+	load_img2img_file_d = g_new0 (LoadImg2ImgData, 1);
+	load_img2img_file_d->win = win;
+	load_img2img_file_d->image_wgt = preview_img;
+	load_img2img_file_d->img2img_file_path = app_data->img2img_file_path;
+	g_signal_connect (load_img2img_btn, "clicked", G_CALLBACK (load_img2img_btn_cb), load_img2img_file_d);
+	g_signal_connect (clear_img2img_btn, "clicked", G_CALLBACK (clear_img2img_btn_cb), load_img2img_file_d);
+	g_signal_connect (clear_img2img_btn, "destroy", G_CALLBACK (on_clear_img2img_btn_destroy), load_img2img_file_d);
 
 	gen_d = g_new0 (GenerationData, 1);
 	gen_d->model_index = &app_data->model_index;
@@ -586,9 +591,11 @@ app_activate (GApplication *app, gpointer user_data)
 	gen_d->win = win;
 	gen_d->img2img_file_path = app_data->img2img_file_path;
 	g_signal_connect (generate_btn, "clicked", G_CALLBACK (generate_cb), gen_d);
+	g_signal_connect (generate_btn, "destroy", G_CALLBACK (on_generate_btn_destroy), gen_d);
 
 	g_signal_connect (quit_btn, "clicked", G_CALLBACK (quit_btn_callback), win);
-	g_signal_connect (win, "close-request", G_CALLBACK (close_app_callback), app_data->img2img_file_path);
+	g_signal_connect (win, "close-request", G_CALLBACK (close_app_callback), user_data);
+	
 	gtk_window_present (GTK_WINDOW (win));
 }
 
@@ -596,13 +603,13 @@ int
 main (int argc, char **argv)
 {
 	GtkApplication *app;
-	AppStartData data = {0};
-	data.img2img_file_path = NULL;
-	data.img2img_file_path = g_string_new("None");
+	AppStartData *data = g_new0 (AppStartData, 1);
+	data->img2img_file_path = NULL;
+	data->img2img_file_path = g_string_new("None");
 	int s;
 
 	app = gtk_application_new ("com.github.LuizAlcantara.NeuralPixel", 0);
-	g_signal_connect (app, "activate", G_CALLBACK (app_activate), &data);
+	g_signal_connect (app, "activate", G_CALLBACK (app_activate), data);
 	s = g_application_run (G_APPLICATION (app), argc, argv);
 	g_object_unref (app);
 	return s;

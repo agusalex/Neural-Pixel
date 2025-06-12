@@ -9,8 +9,8 @@ static void read_png_metadata_deprecated(GtkDialog* dialog, int response, gpoint
 
 static void set_file_path_deprecated(GObject* client, GAsyncResult* res, gpointer user_data);
 
-void open_png_dialog(GtkWidget *btn, gpointer user_data);
+void load_from_img_btn_cb(GtkWidget *btn, gpointer user_data);
 
-void get_img_path_dialog(GtkWidget *btn, gpointer user_data);
+void load_img2img_btn_cb(GtkWidget *btn, gpointer user_data);
 
 #endif // PNG_UTILS_H

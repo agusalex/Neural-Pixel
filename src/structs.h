@@ -58,7 +58,6 @@ typedef struct {
 	GtkWidget *show_img_btn;
 	GtkWidget *halt_btn;
 	char *img_name;
-	GIOChannel *channel;
 } EndGenerationData;
 
 typedef struct {
@@ -95,20 +94,6 @@ typedef struct {
 	GtkWidget *win;
 	GString *img2img_file_path;
 } GenerationData;
-
-typedef struct {
-	int verbose_bool;
-	GtkWidget *button;
-	int sdpid;
-	GDataInputStream *out_pipe_stream;
-} SDProcessOutputData;
-
-typedef struct {
-	int verbose_bool;
-	GtkWidget *win;
-	int sdpid;
-	GDataInputStream *err_pipe_stream;
-} SDProcessErrorData;
 
 typedef struct {
 	GtkWidget *win;
@@ -180,6 +165,20 @@ typedef struct {
 	GtkWidget *vae_check;
 	GtkWidget *flash_check;
 } ResetCbData;
+
+typedef struct {
+	int verbose_bool;
+	GtkWidget *button;
+	int sdpid;
+	GDataInputStream *out_pipe_stream;
+} SDProcessOutputData;
+
+typedef struct {
+	int verbose_bool;
+	GtkWidget *win;
+	int sdpid;
+	GDataInputStream *err_pipe_stream;
+} SDProcessErrorData;
 
 typedef struct {
 	int sd_pid;

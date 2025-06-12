@@ -8,7 +8,7 @@
 #include "global.h"
 #include "structs.h"
 
-void add_dropdown_selected_item_textview(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
+void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
 {
 	if (GTK_IS_DROP_DOWN(wgt)) {
 		DropDownPathData *data = user_data;
@@ -37,7 +37,7 @@ void add_dropdown_selected_item_textview(GtkWidget* wgt, GParamSpec *pspec, gpoi
 	}
 }
 
-void array_strings_free(const char **list)
+void array_strings_free (const char **list)
 {
 	if (list != NULL) {
 		for (int i = 0; list[i] != NULL; i++) {
@@ -47,7 +47,7 @@ void array_strings_free(const char **list)
 	}
 }
 
-void clear_img2img_path (GtkWindow *wgt, gpointer user_data)
+void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data)
 {
 	LoadImg2ImgData *data = user_data;
 	GString *gstr = data->img2img_file_path;
@@ -58,12 +58,15 @@ void clear_img2img_path (GtkWindow *wgt, gpointer user_data)
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data)
 {
-	GString *str = (GString *)user_data;
-	g_string_free(str, TRUE);
+	AppStartData *data = user_data;
+	if (data == NULL) return 0;
+	g_string_free(data->img2img_file_path, TRUE);
+	data->img2img_file_path = NULL;
 	gtk_window_destroy (win);
+	g_free(data);
 }
 
-void dropdown_items_update(const char *path, GtkWidget *dd)
+void dropdown_items_update (const char *path, GtkWidget *dd)
 {
 	const char**dd_items = get_files(path);
 	GtkStringList* nl = gtk_string_list_new(dd_items);
@@ -71,7 +74,7 @@ void dropdown_items_update(const char *path, GtkWidget *dd)
 	array_strings_free(dd_items);
 }
 
-void free_cache_data(MyCacheData *s)
+void free_cache_data (MyCacheData *s)
 {
 	if (s == NULL) {
 		return;
@@ -82,7 +85,20 @@ void free_cache_data(MyCacheData *s)
 	free(s);
 }
 
-void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data)
+void free_app_start_data (gpointer data)
+{
+	AppStartData *app_start_d = (AppStartData *)data;
+	g_string_free(app_start_d->img2img_file_path, TRUE);
+	g_free(app_start_d);
+}
+
+
+void free_preview_data (gpointer data)
+{
+	PreviewImageData *preview_d = (PreviewImageData *)data;
+	g_free(preview_d);
+}
+void kill_stable_diffusion_process (GtkButton *btn, gpointer user_data)
 {
 	gtk_widget_set_sensitive(GTK_WIDGET(btn), FALSE);
 
@@ -109,10 +125,68 @@ void kill_stable_diffusion_process(GtkButton *btn, gpointer user_data)
 	#endif
 }
 
-void on_dropdown_destroy(GtkWidget* wgt, gpointer user_data)
+void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	LoadImg2ImgData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
+void on_dd_const_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	DropDownConstData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
+void on_dd_path_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	DropDownPathData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
+void on_dropdown_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	const char** di = (const char**)user_data;
 	array_strings_free(di);
+}
+
+void on_generate_btn_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	GenerationData *data = user_data;
+	if (data == NULL) return;
+	//g_string_free(data->img2img_file_path, TRUE);
+	//data->img2img_file_path = NULL;
+	g_free(data);
+}
+
+void on_hide_img_btn_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	PreviewImageData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
+void on_load_from_img_btn_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	LoadPNGData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
+void on_reload_btn_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	ReloadDropDownData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
+}
+
+void on_reset_default_btn_destroy (GtkWidget* wgt, gpointer user_data)
+{
+	ResetCbData *data = user_data;
+	if (data == NULL) return;
+	g_free(data);
 }
 
 void quit_btn_callback (GtkWidget *wgt, GtkWidget *win)
@@ -134,7 +208,7 @@ void reload_dropdown(GtkWidget* wgt, gpointer user_data)
 	dropdown_items_update(EMBEDDINGS_PATH, GTK_WIDGET(data->embedding_dd));
 }
 
-void reset_view_callback (GtkWidget* btn, gpointer user_data)
+void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)
 {
 	ResetCbData *data = user_data;
 
@@ -227,7 +301,7 @@ void set_dropdown_selected_const_item(GtkWidget* wgt, GParamSpec *pspec, int *i1
 	*i1 = (int)s;
 }
 
-void set_dropdown_selected_item(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
+void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
 {
 	if (GTK_IS_DROP_DOWN(wgt)) {
 		DropDownConstData *data = user_data;
@@ -249,13 +323,13 @@ void set_dropdown_selected_item(GtkWidget* wgt, GParamSpec *pspec, gpointer user
 	}
 }
 
-void set_spin_value_to_var(GtkWidget *w, double *v)
+void set_spin_value_to_var (GtkWidget *w, double *v)
 {
 	double value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(w));
 	*v = value;
 }
 
-void toggle_image_visibility(GtkButton *btn, gpointer user_data)
+void hide_img_btn_cb (GtkButton *btn, gpointer user_data)
 {
 	PreviewImageData *data = user_data;
 	GtkImage *img = GTK_IMAGE(data->image_widget);
@@ -269,7 +343,7 @@ void toggle_image_visibility(GtkButton *btn, gpointer user_data)
 	}
 }
 
-void toggle_extra_options(GtkCheckButton *btn, gpointer user_data)
+void toggle_extra_options (GtkCheckButton *btn, gpointer user_data)
 {
 	int *i = (int *)user_data;
 	*i = gtk_check_button_get_active(btn) == TRUE ? 1 : 0;

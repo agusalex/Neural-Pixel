@@ -53,6 +53,9 @@ static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		
 	} else {
 		gboolean s_closed = g_input_stream_close(G_INPUT_STREAM(data->err_pipe_stream), NULL, NULL);
+		g_object_unref(data->err_pipe_stream);
+		data->err_pipe_stream = NULL;
+		g_free(data);
 	}
 }
 
@@ -131,6 +134,9 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 		);
 	} else {
 		gboolean s_closed = g_input_stream_close(G_INPUT_STREAM(data->out_pipe_stream), NULL, NULL);
+		g_object_unref(data->out_pipe_stream);
+		data->out_pipe_stream = NULL;
+		g_free(data);
 	}
 }
 
@@ -153,6 +159,7 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	gtk_widget_set_sensitive(GTK_WIDGET(data->button), TRUE);
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), FALSE);
 	free(data->cmd);
+	g_free(data);
 	g_object_unref(source_object);
 }
 
@@ -256,7 +263,7 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		check_d->show_img_btn = data->show_img_btn;
 		check_d->halt_btn = data->halt_btn;
 		check_d->img_name = img_name;
-		check_d->channel = NULL;
+		
 		SDProcessOutputData *output_d = g_new0 (SDProcessOutputData, 1);
 		output_d->verbose_bool = *data->verbose_bool;
 		output_d->button = GTK_WIDGET(gen_btn);

@@ -67,18 +67,18 @@ GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, 
 	gtk_drop_down_set_factory(GTK_DROP_DOWN(dd), fact);
 
 	if (tb != NULL) {
-		DropDownPathData *data = g_new0 (DropDownPathData, 1);
-		data->tb_type = tb_type;
-		data->textbuffer = tb;
-		g_signal_connect(dd, "notify::selected-item", G_CALLBACK(add_dropdown_selected_item_textview), data);
-		g_signal_connect(dd, "destroy", G_CALLBACK(on_dropdown_destroy), NULL);
+		DropDownPathData *dd_path_data = g_new0 (DropDownPathData, 1);
+		dd_path_data->tb_type = tb_type;
+		dd_path_data->textbuffer = tb;
+		g_signal_connect(dd, "notify::selected-item", G_CALLBACK(add_dropdown_selected_item_textview), dd_path_data);
+		g_signal_connect(dd, "destroy", G_CALLBACK(on_dd_path_destroy), dd_path_data);
 		gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), 0);
 	} else {
-		DropDownConstData *data = g_new0 (DropDownConstData, 1);
-		data->var = var;
-		data->req_int = is_req;
-		data->g_btn = gen_btn;
-		g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_item), data);
+		DropDownConstData *dd_const_data = g_new0 (DropDownConstData, 1);
+		dd_const_data->var = var;
+		dd_const_data->req_int = is_req;
+		dd_const_data->g_btn = gen_btn;
+		g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_item), dd_const_data);
 		if (is_req == 1) {
 			if (*var == 0) {
 				gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a model.");
@@ -88,7 +88,7 @@ GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, 
 				gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), TRUE);
 			}
 		}
-		g_signal_connect(dd, "destroy", G_CALLBACK(on_dropdown_destroy), NULL);
+		g_signal_connect(dd, "destroy", G_CALLBACK(on_dd_const_destroy), dd_const_data);
 		gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), *var);
 	}
 

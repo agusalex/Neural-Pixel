@@ -589,7 +589,7 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 
 #endif
 
-void open_png_dialog(GtkWidget *btn, gpointer user_data)
+void load_from_img_btn_cb(GtkWidget *btn, gpointer user_data)
 {
 	#if GTK_CHECK_VERSION(4, 10, 0)
 		LoadPNGData *data = user_data;
@@ -632,7 +632,7 @@ void open_png_dialog(GtkWidget *btn, gpointer user_data)
 	#endif
 }
 
-void get_img_path_dialog(GtkWidget *btn, gpointer user_data)
+void load_img2img_btn_cb(GtkWidget *btn, gpointer user_data)
 {
 	#if GTK_CHECK_VERSION(4, 10, 0)
 		LoadImg2ImgData *data = user_data;
