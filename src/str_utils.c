@@ -3,21 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void add_strings(char **s1, const char *s2)
-{
-	if (s1 == NULL || *s1 == NULL || s2 == NULL) {
-		perror("Invalid input");
-		exit(EXIT_FAILURE);
-	}
-	size_t n_size = strlen(*s1) + strlen(s2) + 1;
-	*s1 = realloc(*s1, n_size);
-	if (*s1 == NULL) {
-		perror("Failed to reallocate memory");
-		exit(EXIT_FAILURE);
-	}
-	strcat(*s1, s2);
-}
-
 int check_list_contains_item(const char* const* list, const char* item)
 {
 	int i = 0;

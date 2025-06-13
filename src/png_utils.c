@@ -50,30 +50,25 @@ static void read_png_metadata(GObject* client, GAsyncResult* res, gpointer user_
 		int num_text;
 		png_get_text(png, info, &text, &num_text);
 
-		char *l1 = malloc(sizeof(char));
-		if (l1 == NULL) {
-			perror("Failed to allocate memory for array1");
-		}
-		l1[0] = '\0';
+		GString *l1 = g_string_new(NULL);
 
 		for (int i = 0; i < num_text; i++) {
-			add_strings(&l1, text[i].key);
-			add_strings(&l1, text[i].text);
+			g_string_append_printf(l1, "%s %s", text[i].key, text[i].text);
 		}
 
 		LoadPNGData *data = user_data;
 		
-		char *pos_start = strchr(l1, '"');
-		char *neg_start = strstr(l1, "\"\nNegative prompt: \"");
-		char *steps_start = strstr(l1, "\"\nSteps: ");
-		char *cfg_start = strstr(l1, ", CFG scale: ");
-		char *guidance_start = strstr(l1, ", Guidance: ");
-		char *seed_start = strstr(l1, ", Seed: ");
-		char *size_start = strstr(l1, ", Size: ");
-		char *model_start = strstr(l1, ", Model: ");
-		char *rng_start = strstr(l1, ", RNG: ");
-		char *sampler_start = strstr(l1, ", Sampler: ");
-		char *version_start = strstr(l1, ", Version: ");
+		char *pos_start = strchr(l1->str, '"');
+		char *neg_start = strstr(l1->str, "\"\nNegative prompt: \"");
+		char *steps_start = strstr(l1->str, "\"\nSteps: ");
+		char *cfg_start = strstr(l1->str, ", CFG scale: ");
+		char *guidance_start = strstr(l1->str, ", Guidance: ");
+		char *seed_start = strstr(l1->str, ", Seed: ");
+		char *size_start = strstr(l1->str, ", Size: ");
+		char *model_start = strstr(l1->str, ", Model: ");
+		char *rng_start = strstr(l1->str, ", RNG: ");
+		char *sampler_start = strstr(l1->str, ", Sampler: ");
+		char *version_start = strstr(l1->str, ", Version: ");
 
 		//Set Positive Prompt
 		if(pos_start != NULL && neg_start != NULL) {
@@ -266,7 +261,7 @@ static void read_png_metadata(GObject* client, GAsyncResult* res, gpointer user_
 		}
 		png_destroy_read_struct(&png, &info, NULL);
 		fclose(fp);
-		free(l1);
+		g_string_free(l1, TRUE);
 	}
 }
 
@@ -338,30 +333,25 @@ static void read_png_metadata_deprecated(GtkDialog* dialog, int response, gpoint
 			int num_text;
 			png_get_text(png, info, &text, &num_text);
 
-			char *l1 = malloc(sizeof(char));
-			if (l1 == NULL) {
-				perror("Failed to allocate memory for array1");
-			}
-			l1[0] = '\0';
+			GString *l1 = g_string_new(NULL);
 
 			for (int i = 0; i < num_text; i++) {
-				add_strings(&l1, text[i].key);
-				add_strings(&l1, text[i].text);
+				g_string_append_printf(l1, "%s %s", text[i].key, text[i].text);
 			}
 
 			LoadPNGData *data = user_data;
 			
-			char *pos_start = strchr(l1, '"');
-			char *neg_start = strstr(l1, "\"\nNegative prompt: \"");
-			char *steps_start = strstr(l1, "\"\nSteps: ");
-			char *cfg_start = strstr(l1, ", CFG scale: ");
-			char *guidance_start = strstr(l1, ", Guidance: ");
-			char *seed_start = strstr(l1, ", Seed: ");
-			char *size_start = strstr(l1, ", Size: ");
-			char *model_start = strstr(l1, ", Model: ");
-			char *rng_start = strstr(l1, ", RNG: ");
-			char *sampler_start = strstr(l1, ", Sampler: ");
-			char *version_start = strstr(l1, ", Version: ");
+			char *pos_start = strchr(l1->str, '"');
+			char *neg_start = strstr(l1->str, "\"\nNegative prompt: \"");
+			char *steps_start = strstr(l1->str, "\"\nSteps: ");
+			char *cfg_start = strstr(l1->str, ", CFG scale: ");
+			char *guidance_start = strstr(l1->str, ", Guidance: ");
+			char *seed_start = strstr(l1->str, ", Seed: ");
+			char *size_start = strstr(l1->str, ", Size: ");
+			char *model_start = strstr(l1->str, ", Model: ");
+			char *rng_start = strstr(l1->str, ", RNG: ");
+			char *sampler_start = strstr(l1->str, ", Sampler: ");
+			char *version_start = strstr(l1->str, ", Version: ");
 
 			//Set Positive Prompt
 			if(pos_start != NULL && neg_start != NULL) {
@@ -554,7 +544,7 @@ static void read_png_metadata_deprecated(GtkDialog* dialog, int response, gpoint
 			}
 			png_destroy_read_struct(&png, &info, NULL);
 			fclose(fp);
-			free(l1);
+			g_string_free(l1, TRUE);
 		}
 	}
 	gtk_window_destroy (GTK_WINDOW (dialog));

@@ -52,12 +52,13 @@ typedef struct {
 
 typedef struct {
 	int pid;
-	char *cmd;
+	gchar *result_img_path;
+	gchar **cmd_chunks;
+	GString *cmd_string;
 	GtkWidget *button;
 	GtkWidget *image_widget;
 	GtkWidget *show_img_btn;
 	GtkWidget *halt_btn;
-	char *img_name;
 } EndGenerationData;
 
 typedef struct {

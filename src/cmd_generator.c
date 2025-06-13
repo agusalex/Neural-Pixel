@@ -10,7 +10,7 @@
 #include "str_utils.h"
 #include "widgets_cb.h"
 
-char *gen_sd_string(GenerationData *data)
+GString *gen_sd_string(GenerationData *data)
 {
 	GtkTextBuffer *pos_tb = data->pos_p;
 	GtkTextIter psi;
@@ -47,156 +47,125 @@ char *gen_sd_string(GenerationData *data)
 	
 	GString *img2img_g_string = data->img2img_file_path;
 
-	char *l1 = malloc(10 * sizeof(char));
-
-	if (l1 == NULL) {
-		perror("Failed to allocate memory for cmd string");
-	}
-	l1[0] = '\0';
+	GString *l1 = g_string_new(NULL);
 	
 	#ifdef G_OS_WIN32
-		const gchar *sd_vulkan_name = "sd.exe";
-		
 		gchar *current_dir = g_get_current_dir();
 		
-		add_strings(&l1, current_dir);
+		g_string_append(l1, current_dir);
+		g_free(current_dir);
 		
 		if (*data->cpu_bool == 1) {
-			add_strings(&l1, "\\sd-cpu");
+			g_string_append(l1, "\\sd-cpu");
 		} else {
-			add_strings(&l1, "\\sd");
+			g_string_append(l1, "\\sd");
 		}
 	#else
 		if (*data->cpu_bool == 1) {
-			add_strings(&l1, "./sd-cpu");
+			g_string_append(l1, "./sd-cpu");
 		} else {
-			add_strings(&l1, "./sd");
+			g_string_append(l1, "./sd");
 		}
 	#endif
 	
 	if (img2img_g_string != NULL && strcmp(img2img_g_string->str, "None") != 0) {
-		add_strings(&l1, "|-M|img2img|-i|");
-		add_strings(&l1, img2img_g_string->str);
+		g_string_append_printf(l1, "|-M|img2img|-i|%s", img2img_g_string->str);
 	}
 
-	add_strings(&l1, "|-m|./models/checkpoints/");
-	add_strings(&l1, sel_model);
+	g_string_append_printf(l1, "|-m|./models/checkpoints/%s", sel_model);
 
-	add_strings(&l1, "|--lora-model-dir|./models/loras/|--embd-dir|./models/embeddings");
+	g_string_append(l1, "|--lora-model-dir|./models/loras/|--embd-dir|./models/embeddings");
 
 	if (sel_vae != NULL && strcmp(sel_vae, "None") != 0) {
-		add_strings(&l1, "|--vae|./models/vae/");
-		add_strings(&l1, sel_vae);
+		g_string_append_printf(l1, "|--vae|./models/vae/%s", sel_vae);
 		if (*data->k_vae_bool == 1) {
-			add_strings(&l1, "|--vae-on-cpu");
+			g_string_append(l1, "|--vae-on-cpu");
 		}
 	}
   
 	if (sel_cnet != NULL && strcmp(sel_cnet, "None") != 0) {
-		add_strings(&l1, "|--control-net|./models/controlnet/");
-		add_strings(&l1, sel_cnet);
+		g_string_append_printf(l1, "|--control-net|./models/controlnet/%s", sel_cnet);
 		if (*data->k_cnet_bool == 1) {
-			add_strings(&l1, "|--control-net-cpu");
+			g_string_append(l1, "|--control-net-cpu");
 		}
 	}
 
 	if (sel_upscale != NULL && strcmp(sel_upscale, "None") != 0) {
-		add_strings(&l1, "|--upscale-model|./models/upscale_models/");
-		add_strings(&l1, sel_upscale);
-		add_strings(&l1, "|--upscale-repeats|");
-		add_strings(&l1, up_repeat_str);
+		g_string_append_printf(l1, "|--upscale-model|./models/upscale_models/%s|--upscale-repeats|%s", sel_upscale, up_repeat_str);
 	}
 	
 	if (sel_clip_l != NULL && strcmp(sel_clip_l, "None") != 0) {
-		add_strings(&l1, "|--clip_l|./models/clips/");
-		add_strings(&l1, sel_clip_l);
+		g_string_append_printf(l1, "|--clip_l|./models/clips/%s", sel_clip_l);
 	}
 	
 	if (sel_clip_g != NULL && strcmp(sel_clip_g, "None") != 0) {
-		add_strings(&l1, "|--clip_g|./models/clips/");
-		add_strings(&l1, sel_clip_g);
+		g_string_append_printf(l1, "|--clip_g|./models/clips/%s", sel_clip_g);
 	}
 	
 	if (sel_t5xxl != NULL && strcmp(sel_t5xxl, "None") != 0) {
-		add_strings(&l1, "|--t5xxl|./models/text_encoders/");
-		add_strings(&l1, sel_t5xxl);
+		g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", sel_t5xxl);
 	}
 	
 	if (*data->k_clip_bool == 1) {
 		if (sel_clip_l != NULL || sel_clip_g != NULL || sel_t5xxl != NULL) {
 			if (strcmp(sel_clip_l, "None") != 0 || strcmp(sel_clip_g, "None") != 0 || strcmp(sel_t5xxl, "None") != 0) {
-				add_strings(&l1, "|--clip-on-cpu");
+				g_string_append(l1, "|--clip-on-cpu");
 			}
 		}
 	}
 
-	add_strings(&l1, "|--strength|");
-	add_strings(&l1, denoise_str);
+	g_string_append_printf(l1, "|--strength|%s", denoise_str);
 
 	if (*data->taesd_bool == 1) {
-		add_strings(&l1, "|--taesd|");
-		add_strings(&l1, ".models/TAESD/taesd_decoder.safetensors");
+		g_string_append(l1, "|--taesd|.models/TAESD/taesd_decoder.safetensors");
 	}
 
-	add_strings(&l1, "|--cfg-scale|");
-	add_strings(&l1, cfg_str);
+	g_string_append_printf(l1, "|--cfg-scale|%s", cfg_str);
 
-	add_strings(&l1, "|--sampling-method|");
-	add_strings(&l1, LIST_SAMPLES[(*data->sample_index)]);
+	g_string_append_printf(l1, "|--sampling-method|%s", LIST_SAMPLES[(*data->sample_index)]);
 
-	add_strings(&l1, "|--schedule|");
-	add_strings(&l1, LIST_SCHEDULES[(*data->schedule_index)]);
+	g_string_append_printf(l1, "|--schedule|%s", LIST_SCHEDULES[(*data->schedule_index)]);
 
-	add_strings(&l1, "|-s|");
-	add_strings(&l1, seed_str);
+	g_string_append_printf(l1,"|-s|%s", seed_str);
 
-	add_strings(&l1, "|--steps|");
-	add_strings(&l1, LIST_STEPS_STR[(*data->n_steps_index)]);
+	g_string_append_printf(l1, "|--steps|%s", LIST_STEPS_STR[(*data->n_steps_index)]);
 
-	add_strings(&l1, "|-b|");
-	add_strings(&l1, LIST_STEPS_STR[(*data->bs_index)]);
+	g_string_append_printf(l1, "|-b|%s", LIST_STEPS_STR[(*data->bs_index)]);
 
 	if (img2img_g_string == NULL || strcmp(img2img_g_string->str, "None") == 0) {
-		add_strings(&l1, "|-W|");
-		add_strings(&l1, LIST_RESOLUTIONS_STR[(*data->w_index)]);
-
-		add_strings(&l1, "|-H|");
-		add_strings(&l1, LIST_RESOLUTIONS_STR[(*data->h_index)]);
+		g_string_append_printf(l1, "|-W|%s", LIST_RESOLUTIONS_STR[(*data->w_index)]);
+		g_string_append_printf(l1, "|-H|%s", LIST_RESOLUTIONS_STR[(*data->h_index)]);
 	}
 
 	if (*data->vt_bool == 1) {
-		add_strings(&l1, "|--vae-tiling");
+		g_string_append(l1, "|--vae-tiling");
 	}
 
 	if (*data->fa_bool == 1) {
-		add_strings(&l1, "|--diffusion-fa");
+		g_string_append(l1, "|--diffusion-fa");
 	}
 
 	if (p_text != NULL) {
-		add_strings(&l1, "|-p|\"");
-		add_strings(&l1, p_text);
+		g_string_append_printf(l1, "|-p|\"%s\"", p_text);
 	}
 
 	if (n_text != NULL) {
-		add_strings(&l1, "\"|-n|\"");
-		add_strings(&l1, n_text);
-		add_strings(&l1, "\"");
+		g_string_append_printf(l1, "|-n|\"%s\"", n_text);
 	}
 
 	int n_img_count = count_output_files();
 	char *n_img_string = convert_int_to_string(n_img_count);
 	
 	#ifdef G_OS_WIN32
-		add_strings(&l1, "|-o|.\\outputs\\IMG_");
+		g_string_append_printf(l1, "|-o|.\\outputs\\IMG_%s.png", n_img_string);
 	#else
-		add_strings(&l1, "|-o|./outputs/IMG_");
+		g_string_append_printf(l1, "|-o|./outputs/IMG_%s.png", n_img_string);
 	#endif
-	
-	add_strings(&l1, n_img_string);
-	add_strings(&l1, ".png");
 
 	update_cache(data, sel_model, sel_vae, sel_cnet, sel_upscale, sel_clip_l, sel_clip_g, sel_t5xxl, p_text, n_text, n_img_string);
 
+	g_free(p_text);
+	g_free(n_text);
 	free(n_img_string);
 	free(cfg_str);
 	free(denoise_str);
@@ -206,22 +175,21 @@ char *gen_sd_string(GenerationData *data)
 	array_strings_free(vae_items);
 	array_strings_free(cnet_items);
 	array_strings_free(upscale_items);
+	array_strings_free(clip_l_items);
+	array_strings_free(clip_g_items);
+	array_strings_free(t5xxl_items);
 	
 	if (*data->verbose_bool == 1) {
-		char *str = malloc((strlen(l1) + 1) * sizeof(char));
-		int i = 0;
-		while (l1[i] != '\0') {
-			if (l1[i] == '|') {
-				str[i] = ' ';
-			} else {
-				str[i] = l1[i];
+		GString *l1_copy = g_string_new_len(l1->str, l1->len);
+
+		for (gsize i = 0; i < l1_copy->len; i++) {
+			if (l1_copy->str[i] == '|') {
+				l1_copy->str[i] = ' ';
 			}
-			i++;
 		}
-		str[i] = '\0';
 		
-		printf("%s\n", str);
-		free(str);
+		printf("%s\n", l1_copy->str);
+		g_string_free(l1_copy, TRUE);
 	}
 
 	return l1;

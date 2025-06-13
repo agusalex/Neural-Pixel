@@ -1,8 +1,6 @@
 #ifndef STR_UTILS_H
 #define STR_UTILS_H
 
-void add_strings(char **s1, const char *s2);
-
 int check_list_contains_item(const char* const* list, const char* item);
 
 int compare_strings(const void *a, const void *b);

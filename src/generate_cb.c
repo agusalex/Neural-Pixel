@@ -163,8 +163,8 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	
 	if (g_strcmp0 (icon_n, "view-conceal-symbolic") != 0) {
 		GtkImage *prev_img = GTK_IMAGE(data->image_widget);
-		if (check_file_exists(data->img_name, 0) == 1) {
-			gtk_image_set_from_file(prev_img, data->img_name);
+		if (check_file_exists(data->result_img_path, 0) == 1) {
+			gtk_image_set_from_file(prev_img, data->result_img_path);
 		} else {
 			gtk_image_set_from_file(prev_img, "./resources/example.png");
 		}
@@ -173,7 +173,8 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 	gtk_button_set_label(GTK_BUTTON(data->button), "Generate");
 	gtk_widget_set_sensitive(GTK_WIDGET(data->button), TRUE);
 	gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), FALSE);
-	free(data->cmd);
+	g_strfreev(data->cmd_chunks);
+	g_string_free(data->cmd_string, TRUE);
 	g_free(data);
 	g_object_unref(source_object);
 }
@@ -217,35 +218,26 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		gtk_widget_set_sensitive(GTK_WIDGET(data->halt_btn), TRUE);
 	}
 
-	char *c_line = gen_sd_string(data);
+	GString *cmd_string = gen_sd_string(data);
 
-	char *argv[50];
-	int argc = 0;
-
-	char *cmd = strdup(c_line);
-	if (cmd == NULL) {
-		fprintf(stderr, "Memory allocation failed!\n");
+	gchar **cmd_chunks = g_strsplit(cmd_string->str, "|", -1);
+	gchar *result_img_path = NULL;
+	
+	if (cmd_chunks != NULL) {
+		gint chunk_count = 0;
+		while (cmd_chunks[chunk_count] != NULL) {
+			chunk_count++;
+		}
+		
+		if (chunk_count > 0) {
+			result_img_path = cmd_chunks[chunk_count - 1];
+		}
 	}
-
-	free(c_line);
-
-	char *t;
-	char* str = cmd;
-
-	while ((t = strtok_r(str, "|", &str))) {
-		argv[argc] = t; 
-		argc++;
-	}
-
-	argv[argc] = '\0';
-	const gchar * const *argv_const = (const gchar * const *)argv;
-
-	char *img_name = argv[argc -1];
 
 	GSubprocessFlags sd_flags = G_SUBPROCESS_FLAGS_STDOUT_PIPE | G_SUBPROCESS_FLAGS_STDERR_PIPE;
 	GError *error = NULL;
 
-	GSubprocess* sd_process = g_subprocess_newv(argv_const, sd_flags, &error);
+	GSubprocess* sd_process = g_subprocess_newv((const gchar * const *)cmd_chunks, sd_flags, &error);
 
 	if (sd_process == NULL) {
 		g_print("Error spawning process: %s\n", error->message);
@@ -272,12 +264,13 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 
 		EndGenerationData *check_d = g_new0 (EndGenerationData, 1);
 		check_d->pid = npid;
-		check_d->cmd = cmd;
+		check_d->result_img_path = result_img_path;
+		check_d->cmd_chunks = cmd_chunks;
+		check_d->cmd_string = cmd_string;
 		check_d->button = GTK_WIDGET(gen_btn);
 		check_d->image_widget = data->image_widget;
 		check_d->show_img_btn = data->show_img_btn;
 		check_d->halt_btn = data->halt_btn;
-		check_d->img_name = img_name;
 		
 		SDProcessOutputData *output_d = g_new0 (SDProcessOutputData, 1);
 		output_d->verbose_bool = *data->verbose_bool;

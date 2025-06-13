@@ -3,6 +3,6 @@
 
 #include "structs.h"
 
-char *gen_sd_string(GenerationData *data);
+GString *gen_sd_string(GenerationData *data);
 
 #endif // CMD_GENERATOR_H
