@@ -13,6 +13,6 @@ void load_img_cache(GtkWidget *img_wgt);
 
 void load_cache(gpointer user_data);
 
-void update_cache(GenerationData *data, const char *sel_model, const char *sel_vae, const char *sel_cnet, const char *sel_upscale, const char *sel_clip_l, const char *sel_clip_g, const char *sel_t5xxl, char *pp, char *np, char *img_num);
+void update_cache(GenerationData *data, gchar *sel_model, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscale, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_t5xxl, char *pp, char *np, char *img_num);
 
 #endif // HANDLE_CACHE_H

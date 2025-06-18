@@ -11,7 +11,7 @@
 void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
 {
 	if (GTK_IS_DROP_DOWN(wgt)) {
-		DropDownPathData *data = user_data;
+		DropDownTextBufferData *data = user_data;
 		GtkDropDown *dd = GTK_DROP_DOWN(wgt);
 
 		int tb_type = data->tb_type;
@@ -60,6 +60,20 @@ gboolean close_app_callback (GtkWindow *win, gpointer user_data)
 {
 	AppStartData *data = user_data;
 	if (data == NULL) return 0;
+	g_string_free(data->model_string, TRUE);
+	data->model_string = NULL;
+	g_string_free(data->vae_string, TRUE);
+	data->vae_string = NULL;
+	g_string_free(data->cnet_string, TRUE);
+	data->cnet_string = NULL;
+	g_string_free(data->upscale_string, TRUE);
+	data->upscale_string = NULL;
+	g_string_free(data->clip_l_string, TRUE);
+	data->clip_l_string = NULL;
+	g_string_free(data->clip_g_string, TRUE);
+	data->clip_g_string = NULL;
+	g_string_free(data->t5xxl_string, TRUE);
+	data->t5xxl_string = NULL;
 	g_string_free(data->img2img_file_path, TRUE);
 	data->img2img_file_path = NULL;
 	gtk_window_destroy (win);
@@ -68,10 +82,8 @@ gboolean close_app_callback (GtkWindow *win, gpointer user_data)
 
 void dropdown_items_update (const char *path, GtkWidget *dd)
 {
-	const char**dd_items = get_files(path);
-	GtkStringList* nl = gtk_string_list_new(dd_items);
-	gtk_drop_down_set_model(GTK_DROP_DOWN(dd), G_LIST_MODEL(nl));
-	array_strings_free(dd_items);
+	GtkStringList *new_dd_items = get_files(path);
+	gtk_drop_down_set_model(GTK_DROP_DOWN(dd), G_LIST_MODEL(new_dd_items));
 }
 
 void free_cache_data (MyCacheData *s)
@@ -134,14 +146,14 @@ void on_clear_img2img_btn_destroy (GtkWidget* wgt, gpointer user_data)
 
 void on_dd_const_destroy (GtkWidget* wgt, gpointer user_data)
 {
-	DropDownConstData *data = user_data;
+	DropDownModelsNameData *data = user_data;
 	if (data == NULL) return;
 	g_free(data);
 }
 
 void on_dd_path_destroy (GtkWidget* wgt, gpointer user_data)
 {
-	DropDownPathData *data = user_data;
+	DropDownTextBufferData *data = user_data;
 	if (data == NULL) return;
 	g_free(data);
 }
@@ -304,15 +316,17 @@ void set_dropdown_selected_const_item(GtkWidget* wgt, GParamSpec *pspec, int *i1
 void set_dropdown_selected_item (GtkWidget* wgt, GParamSpec *pspec, gpointer user_data)
 {
 	if (GTK_IS_DROP_DOWN(wgt)) {
-		DropDownConstData *data = user_data;
-		int *var = data->var;
+		DropDownModelsNameData *data = user_data;
+		GString *var_string = data->dd_item_str;
 		int is_req = data->req_int;
 		GtkDropDown *dd = GTK_DROP_DOWN(wgt);
 		guint s = gtk_drop_down_get_selected(dd);
-		*var = (int)s;
+		GtkStringObject *dd_string_obj = gtk_drop_down_get_selected_item(dd);
+		const char *dd_string = gtk_string_object_get_string(dd_string_obj);
+		g_string_assign(var_string, dd_string);
 		if (is_req == 1) {
 			GtkWidget *gen_btn = data->g_btn;
-			if (*var == 0) {
+			if (g_strcmp0(var_string->str, "None") == 0) {
 				gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a model first.");
 				gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
 			} else {

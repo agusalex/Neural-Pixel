@@ -3,6 +3,8 @@
 
 int check_list_contains_item(const char* const* list, const char* item);
 
+int check_gtk_list_contains_item(GtkStringList *list, const char* item);
+
 int compare_strings(const void *a, const void *b);
 
 int count_digits(double n);

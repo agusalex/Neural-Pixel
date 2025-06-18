@@ -194,10 +194,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r3_c1), model_lab);
 	gtk_box_append (GTK_BOX (box_r3_c2), vae_lab);
 
-	model_dd = gen_path_dd(MODELS_PATH, 22, NULL, 0, &app_data->model_index, generate_btn, 1);
+	model_dd = gen_path_dd(MODELS_PATH, 22, NULL, 0, app_data->model_string, generate_btn, 1);
 	gtk_box_append (GTK_BOX (box_r3_c1), model_dd);
 
-	vae_dd = gen_path_dd(VAES_PATH, 22, NULL, 0, &app_data->vae_index, NULL, 0);
+	vae_dd = gen_path_dd(VAES_PATH, 22, NULL, 0, app_data->vae_string, NULL, 0);
 	gtk_box_append (GTK_BOX (box_r3_c2), vae_dd);
 
 	//Set Box Row 4, col 1 and 2
@@ -217,10 +217,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r4_c1), cnet_lab);
 	gtk_box_append (GTK_BOX (box_r4_c2), upscale_lab);
 
-	cnet_dd = gen_path_dd(CONTROLNET_PATH, 22, NULL, 0, &app_data->cnet_index, NULL, 0);
+	cnet_dd = gen_path_dd(CONTROLNET_PATH, 22, NULL, 0, app_data->cnet_string, NULL, 0);
 	gtk_box_append (GTK_BOX (box_r4_c1), cnet_dd);
 
-	upscale_dd = gen_path_dd(UPSCALES_PATH, 22, NULL, 0, &app_data->upscale_index, NULL, 0);
+	upscale_dd = gen_path_dd(UPSCALES_PATH, 22, NULL, 0, app_data->upscale_string, NULL, 0);
 	gtk_box_append (GTK_BOX (box_r4_c2), upscale_dd);
 
 
@@ -246,13 +246,13 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r5_c2), clip_g_lab);
 	gtk_box_append (GTK_BOX (box_r5_c3), t5xxl_lab);
 	
-	clip_l_dd = gen_path_dd(CLIPS_PATH, 22, NULL, 0, &app_data->clip_l_index, NULL, 0);
+	clip_l_dd = gen_path_dd(CLIPS_PATH, 22, NULL, 0, app_data->clip_l_string, NULL, 0);
 	gtk_box_append (GTK_BOX (box_r5_c1), clip_l_dd);
 	
-	clip_g_dd = gen_path_dd(CLIPS_PATH, 22, NULL, 0, &app_data->clip_g_index, NULL, 0);
+	clip_g_dd = gen_path_dd(CLIPS_PATH, 22, NULL, 0, app_data->clip_g_string, NULL, 0);
 	gtk_box_append (GTK_BOX (box_r5_c2), clip_g_dd);
 	
-	t5xxl_dd = gen_path_dd(TEXT_ENCODERS_PATH, 22, NULL, 0, &app_data->t5xxl_index, NULL, 0);
+	t5xxl_dd = gen_path_dd(TEXT_ENCODERS_PATH, 22, NULL, 0, app_data->t5xxl_string, NULL, 0);
 	gtk_box_append (GTK_BOX (box_r5_c3), t5xxl_dd);
 
 
@@ -323,10 +323,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r7_c1), lora_lab);
 	gtk_box_append (GTK_BOX (box_r7_c2), embedding_lab);
 
-	lora_dd = gen_path_dd(LORAS_PATH, 48, pos_tb, 1, 0, NULL, 0);
+	lora_dd = gen_path_dd(LORAS_PATH, 48, pos_tb, 1, NULL, NULL, 0);
 	gtk_box_append (GTK_BOX (box_r7_c1), lora_dd);
 
-	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, 48, neg_tb, 0, 0, NULL, 0);
+	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, 48, neg_tb, 0, NULL, NULL, 0);
 	gtk_box_append (GTK_BOX (box_r7_c2), embedding_dd);
 
 	//Set Box Row 7, col 1
@@ -558,13 +558,13 @@ app_activate (GApplication *app, gpointer user_data)
 	g_signal_connect (clear_img2img_btn, "destroy", G_CALLBACK (on_clear_img2img_btn_destroy), load_img2img_file_d);
 
 	gen_d = g_new0 (GenerationData, 1);
-	gen_d->model_index = &app_data->model_index;
-	gen_d->vae_index = &app_data->vae_index;
-	gen_d->cnet_index = &app_data->cnet_index;
-	gen_d->upscale_index = &app_data->upscale_index;
-	gen_d->clip_l_index = &app_data->clip_l_index;
-	gen_d->clip_g_index = &app_data->clip_g_index;
-	gen_d->t5xxl_index = &app_data->t5xxl_index;
+	gen_d->model_string = app_data->model_string;
+	gen_d->vae_string = app_data->vae_string;
+	gen_d->cnet_string = app_data->cnet_string;
+	gen_d->upscale_string = app_data->upscale_string;
+	gen_d->clip_l_string = app_data->clip_l_string;
+	gen_d->clip_g_string = app_data->clip_g_string;
+	gen_d->t5xxl_string = app_data->t5xxl_string;
 	gen_d->sample_index = &app_data->sample_index;
 	gen_d->schedule_index = &app_data->schedule_index;
 	gen_d->n_steps_index = &app_data->n_steps_index;
@@ -604,8 +604,63 @@ main (int argc, char **argv)
 {
 	GtkApplication *app;
 	AppStartData *data = g_new0 (AppStartData, 1);
+	data->model_string = NULL;
+	data->vae_string = NULL;
+	data->cnet_string = NULL;
+	data->upscale_string = NULL;
+	data->clip_l_string = NULL;
+	data->clip_g_string = NULL;
+	data->t5xxl_string = NULL;
 	data->img2img_file_path = NULL;
+	
+	data->model_string = g_string_new("None");
+	if (data->model_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->vae_string = g_string_new("None");
+	if (data->vae_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->cnet_string = g_string_new("None");
+	if (data->cnet_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->upscale_string = g_string_new("None");
+	if (data->upscale_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->clip_l_string = g_string_new("None");
+	if (data->clip_l_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->clip_g_string = g_string_new("None");
+	if (data->clip_g_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
+	data->t5xxl_string = g_string_new("None");
+	if (data->t5xxl_string == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
 	data->img2img_file_path = g_string_new("None");
+	if (data->img2img_file_path == NULL) {
+		g_error("Failed to allocate GString.");
+		return 1;
+	}
+	
 	int s;
 
 	app = gtk_application_new ("com.github.LuizAlcantara.NeuralPixel", 0);

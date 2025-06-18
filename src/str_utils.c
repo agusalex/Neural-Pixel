@@ -15,6 +15,21 @@ int check_list_contains_item(const char* const* list, const char* item)
 	return 0;
 }
 
+int check_gtk_list_contains_item(GtkStringList *list, const char* item)
+{
+	guint i = 0;
+	guint n = g_list_model_get_n_items((GListModel *)list);
+	while(i < n) {
+		//Critical Here
+		const char *s = gtk_string_list_get_string(list, i);
+		if (strcmp(s, item) == 0) {
+			return i;
+		}
+		i++;
+	}
+	return 0;
+}
+
 int compare_strings(const void *a, const void *b)
 {
 	return strcasecmp(*(const char **)a, *(const char **)b);

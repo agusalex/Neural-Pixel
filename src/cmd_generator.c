@@ -24,28 +24,10 @@ GString *gen_sd_string(GenerationData *data)
 	gtk_text_buffer_get_bounds (neg_tb, &nsi, &nei);
 	char *n_text = gtk_text_buffer_get_text(neg_tb, &nsi, &nei, FALSE);
 	
-	const char** model_items = get_files(MODELS_PATH);
-	const char** vae_items = get_files(VAES_PATH);
-	const char** cnet_items = get_files(CONTROLNET_PATH);
-	const char** upscale_items = get_files(UPSCALES_PATH);
-	const char** clip_l_items = get_files(CLIPS_PATH);
-	const char** clip_g_items = get_files(CLIPS_PATH);
-	const char** t5xxl_items = get_files(TEXT_ENCODERS_PATH);
-
-	const char *sel_model = model_items[*data->model_index];
-	const char *sel_vae = vae_items[*data->vae_index];
-	const char *sel_cnet = cnet_items[*data->cnet_index];
-	const char *sel_upscale = upscale_items[*data->upscale_index];
-	const char *sel_clip_l = clip_l_items[*data->clip_l_index];
-	const char *sel_clip_g = clip_g_items[*data->clip_g_index];
-	const char *sel_t5xxl = t5xxl_items[*data->t5xxl_index];
-	
 	char *cfg_str = convert_double_to_string(*data->cfg_value, "%.1f");
 	char *denoise_str = convert_double_to_string(*data->denoise_value, "%.2f");
 	char *seed_str = convert_double_to_string(*data->seed_value, "%.0f");
 	char *up_repeat_str = convert_double_to_string(*data->up_repeat_value, "%.0f");
-	
-	GString *img2img_g_string = data->img2img_file_path;
 
 	GString *l1 = g_string_new(NULL);
 	
@@ -68,47 +50,49 @@ GString *gen_sd_string(GenerationData *data)
 		}
 	#endif
 	
-	if (img2img_g_string != NULL && strcmp(img2img_g_string->str, "None") != 0) {
-		g_string_append_printf(l1, "|-M|img2img|-i|%s", img2img_g_string->str);
+	if (data->img2img_file_path != NULL && strcmp(data->img2img_file_path->str, "None") != 0) {
+		g_string_append_printf(l1, "|-M|img2img|-i|%s", data->img2img_file_path->str);
 	}
 
-	g_string_append_printf(l1, "|-m|./models/checkpoints/%s", sel_model);
+	if (data->model_string != NULL) {
+	g_string_append_printf(l1, "|-m|./models/checkpoints/%s", data->model_string->str);
+	}
+	
+	g_string_append(l1, "|--lora-model-dir|./models/loras|--embd-dir|./models/embeddings");
 
-	g_string_append(l1, "|--lora-model-dir|./models/loras/|--embd-dir|./models/embeddings");
-
-	if (sel_vae != NULL && strcmp(sel_vae, "None") != 0) {
-		g_string_append_printf(l1, "|--vae|./models/vae/%s", sel_vae);
+	if (data->vae_string != NULL && strcmp(data->vae_string->str, "None") != 0) {
+		g_string_append_printf(l1, "|--vae|./models/vae/%s", data->vae_string->str);
 		if (*data->k_vae_bool == 1) {
 			g_string_append(l1, "|--vae-on-cpu");
 		}
 	}
-  
-	if (sel_cnet != NULL && strcmp(sel_cnet, "None") != 0) {
-		g_string_append_printf(l1, "|--control-net|./models/controlnet/%s", sel_cnet);
+
+	if (data->cnet_string != NULL && strcmp(data->cnet_string->str, "None") != 0) {
+		g_string_append_printf(l1, "|--control-net|./models/controlnet/%s", data->cnet_string->str);
 		if (*data->k_cnet_bool == 1) {
 			g_string_append(l1, "|--control-net-cpu");
 		}
 	}
 
-	if (sel_upscale != NULL && strcmp(sel_upscale, "None") != 0) {
-		g_string_append_printf(l1, "|--upscale-model|./models/upscale_models/%s|--upscale-repeats|%s", sel_upscale, up_repeat_str);
+	if (data->upscale_string != NULL && strcmp(data->upscale_string->str, "None") != 0) {
+		g_string_append_printf(l1, "|--upscale-model|./models/upscale_models/%s|--upscale-repeats|%s", data->upscale_string->str, up_repeat_str);
 	}
 	
-	if (sel_clip_l != NULL && strcmp(sel_clip_l, "None") != 0) {
-		g_string_append_printf(l1, "|--clip_l|./models/clips/%s", sel_clip_l);
+	if (data->clip_l_string != NULL && strcmp(data->clip_l_string->str, "None") != 0) {
+		g_string_append_printf(l1, "|--clip_l|./models/clips/%s", data->clip_l_string->str);
 	}
 	
-	if (sel_clip_g != NULL && strcmp(sel_clip_g, "None") != 0) {
-		g_string_append_printf(l1, "|--clip_g|./models/clips/%s", sel_clip_g);
+	if (data->clip_g_string != NULL && strcmp(data->clip_g_string->str, "None") != 0) {
+		g_string_append_printf(l1, "|--clip_g|./models/clips/%s", data->clip_g_string->str);
 	}
 	
-	if (sel_t5xxl != NULL && strcmp(sel_t5xxl, "None") != 0) {
-		g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", sel_t5xxl);
+	if (data->t5xxl_string != NULL && strcmp(data->t5xxl_string->str, "None") != 0) {
+		g_string_append_printf(l1, "|--t5xxl|./models/text_encoders/%s", data->t5xxl_string->str);
 	}
 	
 	if (*data->k_clip_bool == 1) {
-		if (sel_clip_l != NULL || sel_clip_g != NULL || sel_t5xxl != NULL) {
-			if (strcmp(sel_clip_l, "None") != 0 || strcmp(sel_clip_g, "None") != 0 || strcmp(sel_t5xxl, "None") != 0) {
+		if (data->clip_l_string != NULL || data->clip_g_string != NULL || data->t5xxl_string != NULL) {
+			if (strcmp(data->clip_l_string->str, "None") != 0 || strcmp(data->clip_g_string->str, "None") != 0 || strcmp(data->t5xxl_string->str, "None") != 0) {
 				g_string_append(l1, "|--clip-on-cpu");
 			}
 		}
@@ -122,19 +106,29 @@ GString *gen_sd_string(GenerationData *data)
 
 	g_string_append_printf(l1, "|--cfg-scale|%s", cfg_str);
 
-	g_string_append_printf(l1, "|--sampling-method|%s", LIST_SAMPLES[(*data->sample_index)]);
-
-	g_string_append_printf(l1, "|--schedule|%s", LIST_SCHEDULES[(*data->schedule_index)]);
-
+	if (*data->sample_index < LIST_SAMPLES_COUNT - 1) {
+		g_string_append_printf(l1, "|--sampling-method|%s", LIST_SAMPLES[(*data->sample_index)]);
+	}
+	
+	if (*data->schedule_index < LIST_SCHEDULES_COUNT - 1) {
+		g_string_append_printf(l1, "|--schedule|%s", LIST_SCHEDULES[(*data->schedule_index)]);
+	}
+	
 	g_string_append_printf(l1,"|-s|%s", seed_str);
+	
+	if (*data->n_steps_index < LIST_STEPS_STR_COUNT - 1) {
+		g_string_append_printf(l1, "|--steps|%s", LIST_STEPS_STR[(*data->n_steps_index)]);
+	}
+	
+	if (*data->bs_index < LIST_STEPS_STR_COUNT - 1) {
+		g_string_append_printf(l1, "|-b|%s", LIST_STEPS_STR[(*data->bs_index)]);
+	}
 
-	g_string_append_printf(l1, "|--steps|%s", LIST_STEPS_STR[(*data->n_steps_index)]);
-
-	g_string_append_printf(l1, "|-b|%s", LIST_STEPS_STR[(*data->bs_index)]);
-
-	if (img2img_g_string == NULL || strcmp(img2img_g_string->str, "None") == 0) {
-		g_string_append_printf(l1, "|-W|%s", LIST_RESOLUTIONS_STR[(*data->w_index)]);
-		g_string_append_printf(l1, "|-H|%s", LIST_RESOLUTIONS_STR[(*data->h_index)]);
+	if (data->img2img_file_path == NULL || strcmp(data->img2img_file_path->str, "None") == 0) {
+		if (*data->w_index < LIST_RESOLUTIONS_STR_COUNT - 1 && *data->h_index < LIST_RESOLUTIONS_STR_COUNT - 1) {
+			g_string_append_printf(l1, "|-W|%s", LIST_RESOLUTIONS_STR[(*data->w_index)]);
+			g_string_append_printf(l1, "|-H|%s", LIST_RESOLUTIONS_STR[(*data->h_index)]);
+		}
 	}
 
 	if (*data->vt_bool == 1) {
@@ -162,7 +156,7 @@ GString *gen_sd_string(GenerationData *data)
 		g_string_append_printf(l1, "|-o|./outputs/IMG_%s.png", n_img_string);
 	#endif
 
-	update_cache(data, sel_model, sel_vae, sel_cnet, sel_upscale, sel_clip_l, sel_clip_g, sel_t5xxl, p_text, n_text, n_img_string);
+	update_cache(data, data->model_string->str, data->vae_string->str, data->cnet_string->str, data->upscale_string->str, data->clip_l_string->str, data->clip_g_string->str, data->t5xxl_string->str, p_text, n_text, n_img_string);
 
 	g_free(p_text);
 	g_free(n_text);
@@ -171,13 +165,6 @@ GString *gen_sd_string(GenerationData *data)
 	free(denoise_str);
 	free(seed_str);
 	free(up_repeat_str);
-	array_strings_free(model_items);
-	array_strings_free(vae_items);
-	array_strings_free(cnet_items);
-	array_strings_free(upscale_items);
-	array_strings_free(clip_l_items);
-	array_strings_free(clip_g_items);
-	array_strings_free(t5xxl_items);
 	
 	if (*data->verbose_bool == 1) {
 		GString *l1_copy = g_string_new_len(l1->str, l1->len);
@@ -191,6 +178,6 @@ GString *gen_sd_string(GenerationData *data)
 		printf("%s\n", l1_copy->str);
 		g_string_free(l1_copy, TRUE);
 	}
-
+	
 	return l1;
 }

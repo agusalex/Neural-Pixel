@@ -212,19 +212,19 @@ void load_cache(gpointer user_data)
 			line[strcspn(line, "\n")] = '\0';
 			if (i > 24) break;
 			switch(i) {
-				case 0: const char** model_items = get_files(MODELS_PATH); int model_pos = check_list_contains_item(model_items, line); data->model_index = model_pos; array_strings_free(model_items); break;
+				case 0: g_string_assign(data->model_string, line); break;
 
-				case 1: const char** vae_items = get_files(VAES_PATH); int vae_pos = check_list_contains_item(vae_items, line); data->vae_index = vae_pos; array_strings_free(vae_items); break;
+				case 1: g_string_assign(data->vae_string, line); break;
 
-				case 2: const char** cnet_items = get_files(CONTROLNET_PATH); int cnet_pos = check_list_contains_item(cnet_items, line); data->cnet_index = cnet_pos; array_strings_free(cnet_items); break;
+				case 2: g_string_assign(data->cnet_string, line); break;
 
-				case 3: const char** upscale_items = get_files(UPSCALES_PATH); int upscale_pos = check_list_contains_item(upscale_items, line); data->upscale_index = upscale_pos; array_strings_free(upscale_items); break;
+				case 3: g_string_assign(data->upscale_string, line); break;
 				
-				case 4: const char** clip_l_items = get_files(CLIPS_PATH); int clip_l_pos = check_list_contains_item(clip_l_items, line); data->clip_l_index = clip_l_pos; array_strings_free(clip_l_items); break;
+				case 4: g_string_assign(data->clip_l_string, line); break;
 				
-				case 5: const char** clip_g_items = get_files(CLIPS_PATH); int clip_g_pos = check_list_contains_item(clip_g_items, line); data->clip_g_index = clip_g_pos; array_strings_free(clip_g_items); break;
+				case 5: g_string_assign(data->clip_g_string, line); break;
 				
-				case 6: const char** t5xxl_items = get_files(TEXT_ENCODERS_PATH); int t5xxl_pos = check_list_contains_item(t5xxl_items, line); data->t5xxl_index = t5xxl_pos; array_strings_free(t5xxl_items); break;
+				case 6: g_string_assign(data->t5xxl_string, line); break;
 
 				case 7: sscanf(line, "%d", &data->sample_index); break;
 				
@@ -270,7 +270,7 @@ void load_cache(gpointer user_data)
 	}
 }
 
-void update_cache(GenerationData *data, const char *sel_model, const char *sel_vae, const char *sel_cnet, const char *sel_upscale, const char *sel_clip_l, const char *sel_clip_g, const char *sel_t5xxl, char *pp, char *np, char *img_num)
+void update_cache(GenerationData *data, gchar *sel_model, gchar *sel_vae, gchar *sel_cnet, gchar *sel_upscale, gchar *sel_clip_l, gchar *sel_clip_g, gchar *sel_t5xxl, char *pp, char *np, char *img_num)
 {
 	FILE *pcf = fopen(".cache/pp_cache", "wb");
 	FILE *ncf = fopen(".cache/np_cache", "wb");

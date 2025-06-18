@@ -206,11 +206,10 @@ static void read_png_metadata(GObject* client, GAsyncResult* res, gpointer user_
 			model_str[0] = '\0';
 			strncpy(model_str, model_start + 9, model_len);
 			model_str[model_len] = '\0';
-			const char** models_files = get_files(MODELS_PATH);
-			int model_i = check_list_contains_item(models_files, model_str);
 			GtkWidget *model_dd = data->model_dd;
+			GtkStringList *model_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(model_dd)));
+			int model_i = check_gtk_list_contains_item(model_items, model_str);
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(model_dd), model_i);
-			array_strings_free(models_files);
 			free(model_str);
 		}
 		
@@ -489,11 +488,10 @@ static void read_png_metadata_deprecated(GtkDialog* dialog, int response, gpoint
 				model_str[0] = '\0';
 				strncpy(model_str, model_start + 9, model_len);
 				model_str[model_len] = '\0';
-				const char** models_files = get_files(MODELS_PATH);
-				int model_i = check_list_contains_item(models_files, model_str);
 				GtkWidget *model_dd = data->model_dd;
+				GtkStringList *model_items = GTK_STRING_LIST(gtk_drop_down_get_model(GTK_DROP_DOWN(model_dd)));
+				int model_i = check_gtk_list_contains_item(model_items, model_str);
 				gtk_drop_down_set_selected(GTK_DROP_DOWN(model_dd), model_i);
-				array_strings_free(models_files);
 				free(model_str);
 			}
 			

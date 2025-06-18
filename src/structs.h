@@ -5,13 +5,13 @@ typedef struct {
 	GtkApplication *app;
 	GtkWidget *window;
 	GtkWidget *button;
-	int model_index;
-	int vae_index;
-	int cnet_index;
-	int upscale_index;
-	int clip_l_index;
-	int clip_g_index;
-	int t5xxl_index;
+	GString *model_string;
+	GString *vae_string;
+	GString *cnet_string;
+	GString *upscale_string;
+	GString *clip_l_string;
+	GString *clip_g_string;
+	GString *t5xxl_string;
 	int sample_index;
 	int schedule_index;
 	int n_steps_index;
@@ -40,15 +40,15 @@ typedef struct {
 } MyCacheData;
 
 typedef struct {
-	int *var;
+	GString *dd_item_str;
 	int req_int;
 	GtkWidget *g_btn;
-} DropDownConstData;
+} DropDownModelsNameData;
 
 typedef struct {
 	int tb_type;
 	GtkTextBuffer *textbuffer;
-} DropDownPathData;
+} DropDownTextBufferData;
 
 typedef struct {
 	int pid;
@@ -62,13 +62,13 @@ typedef struct {
 } EndGenerationData;
 
 typedef struct {
-	int *model_index;
-	int *vae_index;
-	int *cnet_index;
-	int *upscale_index;
-	int *clip_l_index;
-	int *clip_g_index;
-	int *t5xxl_index;
+	GString *model_string;
+	GString *vae_string;
+	GString *cnet_string;
+	GString *upscale_string;
+	GString *clip_l_string;
+	GString *clip_g_string;
+	GString *t5xxl_string;
 	int *sample_index;
 	int *schedule_index;
 	int *n_steps_index;

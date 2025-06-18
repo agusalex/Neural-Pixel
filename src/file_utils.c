@@ -189,18 +189,15 @@ DIR* check_create_dir(const char* path)
 	}
 }
 
-const char** get_files(const char* path)
+GtkStringList* get_files(const char* path)
 {
 	DIR* dir = check_create_dir(path);
 
 	int nf = 0;
 	nf = count_files(dir, NULL) + 1;
-	const char** files = malloc(sizeof(char*) * (nf + 1));
+	GtkStringList *files = gtk_string_list_new(NULL);
 	char** sort_files = malloc(sizeof(char*) * (nf + 1));
-	if (files == NULL) {
-		closedir(dir);
-		return NULL;
-	}
+	
 	if (sort_files == NULL) {
 		closedir(dir);
 		return NULL;
@@ -220,16 +217,10 @@ const char** get_files(const char* path)
 	qsort(sort_files + 1, nf - 1, sizeof(const char *), compare_strings);
 
 	for (int i = 0; i < nf; i++) {
-		files[i] = malloc((strlen(sort_files[i]) + 1) * sizeof(char));
-		if (files[i] == NULL) {
-			printf("Memory allocation failed!\n");
-			exit(1);
-		}
-		strcpy((char*)files[i], sort_files[i]);
+		gtk_string_list_append(files, sort_files[i]);
 	}
 
 	free(sort_files);
-	files[nf] = NULL;
 	closedir(dir);
 
 	return files;

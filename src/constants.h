@@ -13,9 +13,16 @@ extern const char* UPSCALES_PATH;
 extern const char* VAES_PATH;
 
 extern const char* LIST_RESOLUTIONS_STR[];
+extern const size_t LIST_RESOLUTIONS_STR_COUNT;
+
 extern const char* LIST_STEPS_STR[];
+extern const size_t LIST_STEPS_STR_COUNT;
+
 extern const char* LIST_SAMPLES[];
+extern const size_t LIST_SAMPLES_COUNT;
+
 extern const char* LIST_SCHEDULES[];
+extern const size_t LIST_SCHEDULES_COUNT;
 
 extern const char* POSITIVE_PROMPT;
 extern const char* NEGATIVE_PROMPT;
