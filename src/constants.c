@@ -27,8 +27,8 @@ const char* LIST_SCHEDULES[] = {"discrete", "karras", "exponential", "ays", "git
 const size_t LIST_SCHEDULES_COUNT = sizeof(LIST_SCHEDULES) / sizeof(LIST_SCHEDULES[0]);
 
 
-const char* POSITIVE_PROMPT = "A photo of a redhead woman standing under neon lights at night, wearing an elegant white dress. The scene is set on a rainy city street with a glossy, wet floor reflecting vibrant neon signs in red, blue, and purple. Cinematic lighting, soft shadows, and intricate fabric texture. Photorealistic, ultra high resolution, bokeh background, 85mm lens, shallow depth of field.";
-const char* NEGATIVE_PROMPT = "(low quality, worst quality:1.5), extra fingers, mutated hands, ((poorly drawn hands)), ((poorly drawn face)), ((bad anatomy)), (((bad proportions))), ((extra limbs)), cloned face, (((disfigured))), out of frame, ugly, extra limbs, (bad anatomy), gross proportions, (malformed limbs), ((missing arms)), ((missing legs)), (((extra arms))), (((extra legs)))";
+const char* POSITIVE_PROMPT = "A colossal ancient tree towering over a vast landscape, its massive branches stretching into the sky, glowing blue particles gracefully drifting down from its leaves, bathed in ethereal light. The scene is filled with vibrant colors, lush greens, radiant blues, and golden hues from a dramatic sunset. An epic cinematic background with distant mountains, swirling clouds, and mystical atmosphere, ultra-detailed, 8K resolution, fantasy concept art, volumetric lighting, masterpiece, epic scale";
+const char* NEGATIVE_PROMPT = "blurry, grainy, low resolution, cartoon, low detail, distorted, text, watermark";
 const char* OPTIONAL_ITEMS = "None";
 const char* DEFAULT_IMG_PATH = "./resources/example.png";
 const int DEFAULT_MODELS = 0;
