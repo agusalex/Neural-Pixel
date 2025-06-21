@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "constants.h"
 #include "handle_cache.h"
 #include "file_utils.h"
 #include "str_utils.h"
@@ -55,7 +56,10 @@ int count_output_files()
 {
 	const char *outputs_path = "./outputs/";
 	DIR* dir = opendir(outputs_path);
-	int nf = 1;
+	if (dir == NULL) {
+		return 0;
+	}
+	int nf = 0;
 	
 	struct dirent* entry;
 	while ((entry = readdir(dir)) != NULL) {
@@ -63,7 +67,7 @@ int count_output_files()
 			nf++;
 		}
 	}
-	rewinddir(dir);
+	closedir(dir);
 	return nf;
 }
 
@@ -108,90 +112,85 @@ DIR* check_create_dir(const char* path)
 	DIR* dir = opendir(path);
 	if (dir == NULL) {
 		#ifdef _WIN32
-			if (mkdir("models") != 0) {
+			if (mkdir(path) != 0) {
 				perror("Error creating directory");
-			} else {
-				if (mkdir("outputs") != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/checkpoints") != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/clips") != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/controlnet") != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/embeddings") != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/loras") != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/text_encoders") != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/unet") != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/upscale_models") != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/vae") != 0) {
-					perror("Error creating directory");
-				}
-				closedir(dir);
-				DIR* ndir = opendir(path);
-				return ndir;
+				return NULL;
 			}
+			
+			DIR* ndir = opendir(path);
+			return ndir;
 		#else
-			if (mkdir("models", 0777) != 0) {
+			if (mkdir(path, 0777) != 0) {
 				perror("Error creating directory");
-			} else {
-				if (mkdir("outputs", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/checkpoints", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/clips", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/controlnet", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/embeddings", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/loras", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/text_encoders", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/unet", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/upscale_models", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				if (mkdir("models/vae", 0777) != 0) {
-					perror("Error creating directory");
-				}
-				closedir(dir);
-				DIR* ndir = opendir(path);
-				return ndir;
+				return NULL;
 			}
+			
+			DIR* ndir = opendir(path);
+			return ndir;
 		#endif
 	} else {
 		return dir;
 	}
 }
 
+int check_create_base_dirs() {
+	DIR* cache_dir = opendir(CACHE_PATH);
+	if (cache_dir == NULL) {
+		#ifdef _WIN32
+			if (mkdir(CACHE_PATH) != 0) {
+				perror("Error creating required \".cache\" directory.");
+				return 1;
+			}
+		#else
+			if (mkdir(CACHE_PATH, 0777) != 0) {
+				perror("Error creating required \".cache\" directory.");
+				return 1;
+			}
+		#endif
+	}
+	closedir(cache_dir);
+	
+	DIR* models_dir = opendir(MODELS_PATH);
+	if (models_dir == NULL) {
+		#ifdef _WIN32
+			if (mkdir(MODELS_PATH) != 0) {
+				perror("Error creating required \"models\" directory.");
+				return 1;
+			}
+		#else
+			if (mkdir(MODELS_PATH, 0777) != 0) {
+				perror("Error creating required \"models\" directory.");
+				return 1;
+			}
+		#endif
+	}
+	closedir(models_dir);
+	
+	DIR* outputs_dir = opendir(OUTPUTS_PATH);
+	if (outputs_dir == NULL) {
+		#ifdef _WIN32
+			if (mkdir(OUTPUTS_PATH) != 0) {
+				perror("Error creating required \"outputs\" directory.");
+				return 1;
+			}
+		#else
+			if (mkdir(OUTPUTS_PATH, 0777) != 0) {
+				perror("Error creating required \"outputs\" directory.");
+				return 1;
+			}
+		#endif
+	}
+	closedir(outputs_dir);
+	return 0;
+}
+
 GtkStringList* get_files(const char* path)
 {
 	DIR* dir = check_create_dir(path);
+	if (dir == NULL) {
+		GtkStringList *empty_list = gtk_string_list_new((const char*[]){"None", NULL});
+		return empty_list;
+	}
 
 	int nf = 0;
 	nf = count_files(dir, NULL) + 1;
@@ -200,13 +199,14 @@ GtkStringList* get_files(const char* path)
 	
 	if (sort_files == NULL) {
 		closedir(dir);
-		return NULL;
+		GtkStringList *empty_list = gtk_string_list_new((const char*[]){"None", NULL});
+		return empty_list;
 	}
 
 	int i = 0;
 	struct dirent* entry;
 
-	sort_files[i] = "None";
+	sort_files[0] = strdup("None");
 	while ((entry = readdir(dir)) != NULL) {
 		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && is_directory(entry->d_name) == 0) {
 			sort_files[i + 1] = strdup(entry->d_name); 
@@ -216,10 +216,11 @@ GtkStringList* get_files(const char* path)
 
 	qsort(sort_files + 1, nf - 1, sizeof(const char *), compare_strings);
 
-	for (int i = 0; i < nf; i++) {
-		gtk_string_list_append(files, sort_files[i]);
+	for (int x = 0; x < nf; x++) {
+		gtk_string_list_append(files, sort_files[x]);
+		free(sort_files[x]);
 	}
-
+	
 	free(sort_files);
 	closedir(dir);
 

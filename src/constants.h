@@ -1,8 +1,9 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-extern const char* SD_FILES_PATH;
+extern const char* CACHE_PATH;
 extern const char* MODELS_PATH;
+extern const char* CHECKPOINTS_PATH;
 extern const char* CLIPS_PATH;
 extern const char* CONTROLNET_PATH;
 extern const char* EMBEDDINGS_PATH;
@@ -11,6 +12,7 @@ extern const char* TEXT_ENCODERS_PATH;
 extern const char* UNET_PATH;
 extern const char* UPSCALES_PATH;
 extern const char* VAES_PATH;
+extern const char* OUTPUTS_PATH;
 
 extern const char* LIST_RESOLUTIONS_STR[];
 extern const size_t LIST_RESOLUTIONS_STR_COUNT;

@@ -37,6 +37,52 @@ void add_dropdown_selected_item_textview (GtkWidget* wgt, GParamSpec *pspec, gpo
 	}
 }
 
+void app_start_data_free (gpointer user_data)
+{
+	if (user_data == NULL) return;
+	AppStartData *data = user_data;
+	
+	if (data->model_string != NULL) {
+		g_string_free(data->model_string, TRUE);
+		data->model_string = NULL;
+	}
+	
+	if (data->vae_string != NULL) {
+		g_string_free(data->vae_string, TRUE);
+		data->vae_string = NULL;
+	}
+	
+	if (data->cnet_string != NULL) {
+		g_string_free(data->cnet_string, TRUE);
+		data->cnet_string = NULL;
+	}
+	
+	if (data->upscale_string != NULL) {
+		g_string_free(data->upscale_string, TRUE);
+		data->upscale_string = NULL;
+	}
+	
+	if (data->clip_l_string != NULL) {
+		g_string_free(data->clip_l_string, TRUE);
+		data->clip_l_string = NULL;
+	}
+	
+	if (data->clip_g_string != NULL) {
+		g_string_free(data->clip_g_string, TRUE);
+		data->clip_g_string = NULL;
+	}
+	
+	if (data->t5xxl_string != NULL) {
+		g_string_free(data->t5xxl_string, TRUE);
+		data->t5xxl_string = NULL;
+	}
+	
+	if (data->img2img_file_path != NULL) {
+		g_string_free(data->img2img_file_path, TRUE);
+		data->img2img_file_path = NULL;
+	}
+}
+
 void array_strings_free (const char **list)
 {
 	if (list != NULL) {
@@ -58,26 +104,8 @@ void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data)
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data)
 {
-	AppStartData *data = user_data;
-	if (data == NULL) return 0;
-	g_string_free(data->model_string, TRUE);
-	data->model_string = NULL;
-	g_string_free(data->vae_string, TRUE);
-	data->vae_string = NULL;
-	g_string_free(data->cnet_string, TRUE);
-	data->cnet_string = NULL;
-	g_string_free(data->upscale_string, TRUE);
-	data->upscale_string = NULL;
-	g_string_free(data->clip_l_string, TRUE);
-	data->clip_l_string = NULL;
-	g_string_free(data->clip_g_string, TRUE);
-	data->clip_g_string = NULL;
-	g_string_free(data->t5xxl_string, TRUE);
-	data->t5xxl_string = NULL;
-	g_string_free(data->img2img_file_path, TRUE);
-	data->img2img_file_path = NULL;
+	app_start_data_free(user_data);
 	gtk_window_destroy (win);
-	g_free(data);
 }
 
 void dropdown_items_update (const char *path, GtkWidget *dd)
@@ -95,13 +123,6 @@ void free_cache_data (MyCacheData *s)
 	free(s->neg_p);
 	free(s->img_name);
 	free(s);
-}
-
-void free_app_start_data (gpointer data)
-{
-	AppStartData *app_start_d = (AppStartData *)data;
-	g_string_free(app_start_d->img2img_file_path, TRUE);
-	g_free(app_start_d);
 }
 
 
@@ -168,8 +189,6 @@ void on_generate_btn_destroy (GtkWidget* wgt, gpointer user_data)
 {
 	GenerationData *data = user_data;
 	if (data == NULL) return;
-	//g_string_free(data->img2img_file_path, TRUE);
-	//data->img2img_file_path = NULL;
 	g_free(data);
 }
 
@@ -209,7 +228,7 @@ void quit_btn_callback (GtkWidget *wgt, GtkWidget *win)
 void reload_dropdown(GtkWidget* wgt, gpointer user_data)
 {
 	ReloadDropDownData *data = user_data;
-	dropdown_items_update(MODELS_PATH, GTK_WIDGET(data->model_dd));
+	dropdown_items_update(CHECKPOINTS_PATH, GTK_WIDGET(data->model_dd));
 	dropdown_items_update(VAES_PATH, GTK_WIDGET(data->vae_dd));
 	dropdown_items_update(CONTROLNET_PATH, GTK_WIDGET(data->cnet_dd));
 	dropdown_items_update(UPSCALES_PATH, GTK_WIDGET(data->upscale_dd));

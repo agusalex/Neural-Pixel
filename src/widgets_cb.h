@@ -3,6 +3,8 @@
 
 void add_dropdown_selected_item_textview(GtkWidget* wgt, GParamSpec *pspec, gpointer user_data);
 
+void app_start_data_free (gpointer user_data);
+
 void array_strings_free(const char **list);
 
 void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data);
@@ -12,8 +14,6 @@ gboolean close_app_callback (GtkWindow *win, gpointer user_data);
 void dropdown_items_update(const char *path, GtkWidget *dd);
 
 void free_cache_data(MyCacheData *s);
-
-void free_app_start_data(gpointer data);
 
 void free_preview_data(gpointer data);
 

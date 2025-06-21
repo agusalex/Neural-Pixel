@@ -14,15 +14,8 @@ void create_cache(char *n)
 {
 	DIR* cd = opendir(".cache");
 	if (cd == NULL) {
-		#ifdef _WIN32
-			if (mkdir(".cache") != 0) {
-				perror("Error creating directory");
-			}
-		#else
-			if (mkdir(".cache", 0777) != 0) {
-				perror("Error creating directory");
-			}
-		#endif
+		perror("Error \".cache\" directory does not exist.");
+		exit(1);
 	}
 	closedir(cd);
 

@@ -194,7 +194,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r3_c1), model_lab);
 	gtk_box_append (GTK_BOX (box_r3_c2), vae_lab);
 
-	model_dd = gen_path_dd(MODELS_PATH, 22, NULL, 0, app_data->model_string, generate_btn, 1);
+	model_dd = gen_path_dd(CHECKPOINTS_PATH, 22, NULL, 0, app_data->model_string, generate_btn, 1);
 	gtk_box_append (GTK_BOX (box_r3_c1), model_dd);
 
 	vae_dd = gen_path_dd(VAES_PATH, 22, NULL, 0, app_data->vae_string, NULL, 0);
@@ -602,6 +602,11 @@ app_activate (GApplication *app, gpointer user_data)
 int
 main (int argc, char **argv)
 {
+	int a = check_create_base_dirs();
+	if (a != 0) {
+		return 1;
+	}
+
 	GtkApplication *app;
 	AppStartData *data = g_new0 (AppStartData, 1);
 	data->model_string = NULL;
@@ -666,6 +671,9 @@ main (int argc, char **argv)
 	app = gtk_application_new ("com.github.LuizAlcantara.NeuralPixel", 0);
 	g_signal_connect (app, "activate", G_CALLBACK (app_activate), data);
 	s = g_application_run (G_APPLICATION (app), argc, argv);
+	if (data != NULL) {
+		g_free(data);
+	}
 	g_object_unref (app);
 	return s;
 }

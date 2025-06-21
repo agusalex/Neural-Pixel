@@ -20,6 +20,8 @@ int has_files(const char *directory);
 
 DIR* check_create_dir(const char* path);
 
+int check_create_base_dirs();
+
 GtkStringList* get_files(const char* path);
 
 #endif // FILE_UTILS_H
