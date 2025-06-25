@@ -108,10 +108,20 @@ gboolean close_app_callback (GtkWindow *win, gpointer user_data)
 	gtk_window_destroy (win);
 }
 
-void dropdown_items_update (const char *path, GtkWidget *dd)
+void dropdown_items_update (const char *path, GtkWidget *dd, GApplication *app)
 {
-	GtkStringList *new_dd_items = get_files(path);
-	gtk_drop_down_set_model(GTK_DROP_DOWN(dd), G_LIST_MODEL(new_dd_items));
+	GError *err = NULL;
+	GtkStringList *new_dd_items = get_files(path, &err);
+	if (new_dd_items == NULL) {
+		if (err != NULL) {
+			g_printerr("Error: %s\n", err->message);
+			g_error_free(err);
+			GtkWindow *win = GTK_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
+			gtk_window_close(win);
+		}
+	} else {
+		gtk_drop_down_set_model(GTK_DROP_DOWN(dd), G_LIST_MODEL(new_dd_items));
+	}
 }
 
 void free_cache_data (MyCacheData *s)
@@ -228,15 +238,15 @@ void quit_btn_callback (GtkWidget *wgt, GtkWidget *win)
 void reload_dropdown(GtkWidget* wgt, gpointer user_data)
 {
 	ReloadDropDownData *data = user_data;
-	dropdown_items_update(CHECKPOINTS_PATH, GTK_WIDGET(data->model_dd));
-	dropdown_items_update(VAES_PATH, GTK_WIDGET(data->vae_dd));
-	dropdown_items_update(CONTROLNET_PATH, GTK_WIDGET(data->cnet_dd));
-	dropdown_items_update(UPSCALES_PATH, GTK_WIDGET(data->upscale_dd));
-	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_l_dd));
-	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_g_dd));
-	dropdown_items_update(TEXT_ENCODERS_PATH, GTK_WIDGET(data->t5xxl_dd));
-	dropdown_items_update(LORAS_PATH, GTK_WIDGET(data->lora_dd));
-	dropdown_items_update(EMBEDDINGS_PATH, GTK_WIDGET(data->embedding_dd));
+	dropdown_items_update(CHECKPOINTS_PATH, GTK_WIDGET(data->model_dd), data->app);
+	dropdown_items_update(VAES_PATH, GTK_WIDGET(data->vae_dd), data->app);
+	dropdown_items_update(CONTROLNET_PATH, GTK_WIDGET(data->cnet_dd), data->app);
+	dropdown_items_update(UPSCALES_PATH, GTK_WIDGET(data->upscale_dd), data->app);
+	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_l_dd), data->app);
+	dropdown_items_update(CLIPS_PATH, GTK_WIDGET(data->clip_g_dd), data->app);
+	dropdown_items_update(TEXT_ENCODERS_PATH, GTK_WIDGET(data->t5xxl_dd), data->app);
+	dropdown_items_update(LORAS_PATH, GTK_WIDGET(data->lora_dd), data->app);
+	dropdown_items_update(EMBEDDINGS_PATH, GTK_WIDGET(data->embedding_dd), data->app);
 }
 
 void reset_default_btn_cb (GtkWidget* btn, gpointer user_data)

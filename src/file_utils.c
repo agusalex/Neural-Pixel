@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <limits.h>
+#ifdef _WIN32
+	#include <windows.h>
+	#define PATH_MAX MAX_PATH
+#endif
 #include "constants.h"
 #include "handle_cache.h"
 #include "file_utils.h"
@@ -31,13 +36,15 @@ int is_directory(const char *path)
 	return S_ISDIR(path_stat.st_mode);
 }
 
-int count_files(DIR* dir, const char* const* array)
+int count_files(DIR* dir, const char * dir_path, const char* const* array)
 {
 	int nf = 0;
 	if (dir != NULL && array == NULL) {
 		struct dirent* entry;
+		char full_path[PATH_MAX];
 		while ((entry = readdir(dir)) != NULL) {
-			if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && is_directory(entry->d_name) == 0) {
+			snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, entry->d_name);
+			if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && !is_directory(full_path)) {
 				nf++;
 			}
 		}
@@ -54,7 +61,7 @@ int count_files(DIR* dir, const char* const* array)
 
 int count_output_files()
 {
-	const char *outputs_path = "./outputs/";
+	const char *outputs_path = "./outputs";
 	DIR* dir = opendir(outputs_path);
 	if (dir == NULL) {
 		return 0;
@@ -62,8 +69,10 @@ int count_output_files()
 	int nf = 0;
 	
 	struct dirent* entry;
+	char full_path[PATH_MAX];
 	while ((entry = readdir(dir)) != NULL) {
-		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && is_directory(entry->d_name) == 0) {
+		snprintf(full_path, sizeof(full_path), "%s/%s", outputs_path, entry->d_name);
+		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && !is_directory(full_path)) {
 			nf++;
 		}
 	}
@@ -184,31 +193,33 @@ int check_create_base_dirs() {
 	return 0;
 }
 
-GtkStringList* get_files(const char* path)
+GtkStringList* get_files(const char* path, GError **error)
 {
 	DIR* dir = check_create_dir(path);
 	if (dir == NULL) {
-		GtkStringList *empty_list = gtk_string_list_new((const char*[]){"None", NULL});
-		return empty_list;
+		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Directory '%s' does not exist or cannot be accessed.", path);
+		return NULL;
 	}
 
 	int nf = 0;
-	nf = count_files(dir, NULL) + 1;
+	nf = count_files(dir, path, NULL) + 1;
 	GtkStringList *files = gtk_string_list_new(NULL);
 	char** sort_files = malloc(sizeof(char*) * (nf + 1));
 	
 	if (sort_files == NULL) {
 		closedir(dir);
-		GtkStringList *empty_list = gtk_string_list_new((const char*[]){"None", NULL});
-		return empty_list;
+		g_set_error(error, G_FILE_ERROR, G_FILE_ERROR_NOENT, "Memory allocation failed.", path);
+		return NULL;
 	}
 
 	int i = 0;
 	struct dirent* entry;
+	char full_path[PATH_MAX];
 
 	sort_files[0] = strdup("None");
 	while ((entry = readdir(dir)) != NULL) {
-		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && is_directory(entry->d_name) == 0) {
+		snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
+		if (strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && !is_directory(full_path)) {
 			sort_files[i + 1] = strdup(entry->d_name); 
 			i++;
 		}

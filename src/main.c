@@ -194,10 +194,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r3_c1), model_lab);
 	gtk_box_append (GTK_BOX (box_r3_c2), vae_lab);
 
-	model_dd = gen_path_dd(CHECKPOINTS_PATH, 22, NULL, 0, app_data->model_string, generate_btn, 1);
+	model_dd = gen_path_dd(CHECKPOINTS_PATH, 22, NULL, 0, app_data->model_string, generate_btn, app, 1);
 	gtk_box_append (GTK_BOX (box_r3_c1), model_dd);
 
-	vae_dd = gen_path_dd(VAES_PATH, 22, NULL, 0, app_data->vae_string, NULL, 0);
+	vae_dd = gen_path_dd(VAES_PATH, 22, NULL, 0, app_data->vae_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r3_c2), vae_dd);
 
 	//Set Box Row 4, col 1 and 2
@@ -217,10 +217,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r4_c1), cnet_lab);
 	gtk_box_append (GTK_BOX (box_r4_c2), upscale_lab);
 
-	cnet_dd = gen_path_dd(CONTROLNET_PATH, 22, NULL, 0, app_data->cnet_string, NULL, 0);
+	cnet_dd = gen_path_dd(CONTROLNET_PATH, 22, NULL, 0, app_data->cnet_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r4_c1), cnet_dd);
 
-	upscale_dd = gen_path_dd(UPSCALES_PATH, 22, NULL, 0, app_data->upscale_string, NULL, 0);
+	upscale_dd = gen_path_dd(UPSCALES_PATH, 22, NULL, 0, app_data->upscale_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r4_c2), upscale_dd);
 
 
@@ -246,13 +246,13 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r5_c2), clip_g_lab);
 	gtk_box_append (GTK_BOX (box_r5_c3), t5xxl_lab);
 	
-	clip_l_dd = gen_path_dd(CLIPS_PATH, 22, NULL, 0, app_data->clip_l_string, NULL, 0);
+	clip_l_dd = gen_path_dd(CLIPS_PATH, 22, NULL, 0, app_data->clip_l_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r5_c1), clip_l_dd);
 	
-	clip_g_dd = gen_path_dd(CLIPS_PATH, 22, NULL, 0, app_data->clip_g_string, NULL, 0);
+	clip_g_dd = gen_path_dd(CLIPS_PATH, 22, NULL, 0, app_data->clip_g_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r5_c2), clip_g_dd);
 	
-	t5xxl_dd = gen_path_dd(TEXT_ENCODERS_PATH, 22, NULL, 0, app_data->t5xxl_string, NULL, 0);
+	t5xxl_dd = gen_path_dd(TEXT_ENCODERS_PATH, 22, NULL, 0, app_data->t5xxl_string, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r5_c3), t5xxl_dd);
 
 
@@ -323,10 +323,10 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (box_r7_c1), lora_lab);
 	gtk_box_append (GTK_BOX (box_r7_c2), embedding_lab);
 
-	lora_dd = gen_path_dd(LORAS_PATH, 48, pos_tb, 1, NULL, NULL, 0);
+	lora_dd = gen_path_dd(LORAS_PATH, 48, pos_tb, 1, NULL, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r7_c1), lora_dd);
 
-	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, 48, neg_tb, 0, NULL, NULL, 0);
+	embedding_dd = gen_path_dd(EMBEDDINGS_PATH, 48, neg_tb, 0, NULL, NULL, app, 0);
 	gtk_box_append (GTK_BOX (box_r7_c2), embedding_dd);
 
 	//Set Box Row 7, col 1
@@ -486,6 +486,7 @@ app_activate (GApplication *app, gpointer user_data)
 	gtk_box_append (GTK_BOX (boxr_img), preview_img);
 
 	reload_d = g_new0 (ReloadDropDownData, 1);
+	reload_d->app = app;
 	reload_d->model_dd = model_dd;
 	reload_d->vae_dd = vae_dd;
 	reload_d->cnet_dd = cnet_dd;

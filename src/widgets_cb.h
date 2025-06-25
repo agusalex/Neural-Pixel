@@ -11,7 +11,7 @@ void clear_img2img_btn_cb (GtkWindow *wgt, gpointer user_data);
 
 gboolean close_app_callback (GtkWindow *win, gpointer user_data);
 
-void dropdown_items_update(const char *path, GtkWidget *dd);
+void dropdown_items_update(const char *path, GtkWidget *dd, GApplication *app);
 
 void free_cache_data(MyCacheData *s);
 

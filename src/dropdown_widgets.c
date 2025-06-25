@@ -52,47 +52,60 @@ GtkWidget* gen_const_dd(const char** items, int *def_item)
 	return dd;
 }
 
-GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, int tb_type, GString *dd_item_str, GtkWidget *gen_btn, int is_req)
+GtkWidget* gen_path_dd(const char* path, const int str_size, GtkTextBuffer *tb, int tb_type, GString *dd_item_str, GtkWidget *gen_btn, GApplication *app, int is_req)
 {
 	int start_pos = 0;
 	
-	GtkStringList *my_list = get_files(path);
-	GtkListItemFactory* fact = gtk_signal_list_item_factory_new();
 	
-	if (dd_item_str != NULL) {
-		start_pos = check_gtk_list_contains_item(my_list, dd_item_str->str);
-	}
+	GError *err = NULL;
+	GtkStringList *my_list = get_files(path, &err);
 	
-	g_signal_connect (fact, "setup", G_CALLBACK (factory_setup_cb), NULL);
-	g_signal_connect (fact, "bind", G_CALLBACK (factory_bind_cb), NULL);
-
-	GtkWidget* dd = gtk_drop_down_new(G_LIST_MODEL(my_list), NULL);
-	gtk_drop_down_set_factory(GTK_DROP_DOWN(dd), fact);
-
-	if (tb != NULL) {
-		DropDownTextBufferData *dd_path_data = g_new0 (DropDownTextBufferData, 1);
-		dd_path_data->tb_type = tb_type;
-		dd_path_data->textbuffer = tb;
-		g_signal_connect(dd, "notify::selected-item", G_CALLBACK(add_dropdown_selected_item_textview), dd_path_data);
-		g_signal_connect(dd, "destroy", G_CALLBACK(on_dd_path_destroy), dd_path_data);
-		gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), 0);
-	} else {
-		DropDownModelsNameData *dd_const_data = g_new0 (DropDownModelsNameData, 1);
-		dd_const_data->dd_item_str = dd_item_str;
-		dd_const_data->req_int = is_req;
-		dd_const_data->g_btn = gen_btn;
-		g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_item), dd_const_data);
-		if (is_req == 1) {
-			if (g_strcmp0(dd_item_str->str, "None") == 0) {
-				gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a model.");
-				gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
-			} else {
-				gtk_button_set_label (GTK_BUTTON(gen_btn), "Generate");
-				gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), TRUE);
-			}
+	if (my_list == NULL) {
+		if (err != NULL) {
+			g_printerr("Error: %s\n", err->message);
+			g_error_free(err);
+			GtkWindow *win = GTK_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(app)));
+			gtk_window_close(win);
 		}
-		gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), start_pos);
-		g_signal_connect(dd, "destroy", G_CALLBACK(on_dd_const_destroy), dd_const_data);
+	} else {
+		GtkListItemFactory* fact = gtk_signal_list_item_factory_new();
+		
+		if (dd_item_str != NULL) {
+			start_pos = check_gtk_list_contains_item(my_list, dd_item_str->str);
+		}
+		
+		g_signal_connect (fact, "setup", G_CALLBACK (factory_setup_cb), NULL);
+		g_signal_connect (fact, "bind", G_CALLBACK (factory_bind_cb), NULL);
+
+		GtkWidget* dd = gtk_drop_down_new(G_LIST_MODEL(my_list), NULL);
+		
+		gtk_drop_down_set_factory(GTK_DROP_DOWN(dd), fact);
+
+		if (tb != NULL) {
+			DropDownTextBufferData *dd_path_data = g_new0 (DropDownTextBufferData, 1);
+			dd_path_data->tb_type = tb_type;
+			dd_path_data->textbuffer = tb;
+			g_signal_connect(dd, "notify::selected-item", G_CALLBACK(add_dropdown_selected_item_textview), dd_path_data);
+			g_signal_connect(dd, "destroy", G_CALLBACK(on_dd_path_destroy), dd_path_data);
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), 0);
+		} else {
+			DropDownModelsNameData *dd_const_data = g_new0 (DropDownModelsNameData, 1);
+			dd_const_data->dd_item_str = dd_item_str;
+			dd_const_data->req_int = is_req;
+			dd_const_data->g_btn = gen_btn;
+			g_signal_connect(dd, "notify::selected-item", G_CALLBACK(set_dropdown_selected_item), dd_const_data);
+			if (is_req == 1) {
+				if (g_strcmp0(dd_item_str->str, "None") == 0) {
+					gtk_button_set_label (GTK_BUTTON(gen_btn), "Select a model.");
+					gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), FALSE);
+				} else {
+					gtk_button_set_label (GTK_BUTTON(gen_btn), "Generate");
+					gtk_widget_set_sensitive(GTK_WIDGET(gen_btn), TRUE);
+				}
+			}
+			gtk_drop_down_set_selected(GTK_DROP_DOWN(dd), start_pos);
+			g_signal_connect(dd, "destroy", G_CALLBACK(on_dd_const_destroy), dd_const_data);
+		}
+		return dd;
 	}
-	return dd;
 }

@@ -126,6 +126,7 @@ typedef struct {
 } PreviewImageData;
 
 typedef struct {
+	GApplication* app;
 	GtkWidget* model_dd;
 	GtkWidget* vae_dd;
 	GtkWidget* cnet_dd;

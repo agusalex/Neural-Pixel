@@ -2,18 +2,18 @@
 #include <stdio.h>
 #include "constants.h"
 
-const char* CACHE_PATH = "./.cache/";
-const char* MODELS_PATH = "./models/";
-const char* CHECKPOINTS_PATH = "./models/checkpoints/";
-const char* CLIPS_PATH = "./models/clips/";
-const char* CONTROLNET_PATH = "./models/controlnet/";
-const char* EMBEDDINGS_PATH = "./models/embeddings/";
-const char* LORAS_PATH = "./models/loras/";
-const char* TEXT_ENCODERS_PATH = "./models/text_encoders/";
-const char* UNET_PATH = "./models/unet/";
-const char* UPSCALES_PATH = "./models/upscale_models/";
-const char* VAES_PATH = "./models/vae/";
-const char* OUTPUTS_PATH = "./outputs/";
+const char* CACHE_PATH = "./.cache";
+const char* MODELS_PATH = "./models";
+const char* CHECKPOINTS_PATH = "./models/checkpoints";
+const char* CLIPS_PATH = "./models/clips";
+const char* CONTROLNET_PATH = "./models/controlnet";
+const char* EMBEDDINGS_PATH = "./models/embeddings";
+const char* LORAS_PATH = "./models/loras";
+const char* TEXT_ENCODERS_PATH = "./models/text_encoders";
+const char* UNET_PATH = "./models/unet";
+const char* UPSCALES_PATH = "./models/upscale_models";
+const char* VAES_PATH = "./models/vae";
+const char* OUTPUTS_PATH = "./outputs";
 
 
 const char* LIST_RESOLUTIONS_STR[] = {"64", "128", "192", "256", "320", "384", "448", "512", "576", "640", "704", "768", "832", "896", "960", "1024", "1088", "1152", "1216", "1280", NULL};
