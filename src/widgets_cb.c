@@ -121,6 +121,7 @@ void dropdown_items_update (const char *path, GtkWidget *dd, GApplication *app)
 		}
 	} else {
 		gtk_drop_down_set_model(GTK_DROP_DOWN(dd), G_LIST_MODEL(new_dd_items));
+		g_object_unref(new_dd_items);
 	}
 }
 

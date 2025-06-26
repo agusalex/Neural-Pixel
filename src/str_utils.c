@@ -17,14 +17,17 @@ int check_list_contains_item(const char* const* list, const char* item)
 
 int check_gtk_list_contains_item(GtkStringList *list, const char* item)
 {
-	guint i = 0;
-	guint n = g_list_model_get_n_items((GListModel *)list);
-	while(i < n) {
-		const char *s = gtk_string_list_get_string(list, i);
-		if (strcmp(s, item) == 0) {
-			return i;
+	if (G_IS_LIST_MODEL(list)) {
+		guint i = 0;
+		guint n = g_list_model_get_n_items((GListModel *)list);
+		while(i < n) {
+			const char *s = gtk_string_list_get_string(list, i);
+			if (strcmp(s, item) == 0) {
+				return i;
+			}
+			i++;
 		}
-		i++;
+		return 0;
 	}
 	return 0;
 }
