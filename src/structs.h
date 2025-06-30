@@ -100,6 +100,7 @@ typedef struct {
 	GtkWidget *win;
 	GtkWidget *image_wgt;
 	GString *img2img_file_path;
+	GCancellable *cancellable;
 } LoadImg2ImgData;
 
 typedef struct {
@@ -114,6 +115,7 @@ typedef struct {
 	GtkWidget *model_dd;
 	GtkWidget *sample_dd;
 	GtkWidget *schedule_dd;
+	GCancellable *cancellable;
 } LoadPNGData;
 
 typedef struct {

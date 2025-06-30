@@ -258,23 +258,38 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 #if GTK_CHECK_VERSION(4, 10, 0)
 static void read_png_metadata(GObject* client, GAsyncResult* res, gpointer user_data)
 {
-	g_autoptr(GFile) png_file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(client), res, NULL);
+	LoadPNGData *data = user_data;
+	g_autoptr(GError) error = NULL;
+	g_autoptr(GFile) png_file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(client), res, &error);
+	
+	if (error != NULL) {
+		g_warning("Opening file for metadata failed: %s", error->message);
+	}
 
 	if (png_file != NULL) {
 		set_png_metadata(png_file, user_data);
+	}
+	if (data->cancellable != NULL) {
+		g_object_unref(data->cancellable);
+		data->cancellable = NULL;
 	}
 }
 
 static void set_file_path(GObject* client, GAsyncResult* res, gpointer user_data)
 {
-	GFile *png_file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(client), res, NULL);
+	LoadImg2ImgData *data = user_data;
+	g_autoptr(GError) error = NULL;
+	
+	g_autoptr(GFile) png_file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(client), res, &error);
+	
+	if (error != NULL) {
+		g_warning("Opening file failed: %s", error->message);
+	}
 
 	if (png_file != NULL) {
 		char *path = g_file_get_path(png_file);
 		if (path != NULL) {
-			LoadImg2ImgData *data = user_data;
-			GString *str = data->img2img_file_path;
-			g_string_assign(str, path);
+			g_string_assign(data->img2img_file_path, path);
 			GtkImage *prev_img = GTK_IMAGE(data->image_wgt);
 			if (check_file_exists(path, 0) == 1) {
 				gtk_image_set_from_file(prev_img, path);
@@ -283,6 +298,10 @@ static void set_file_path(GObject* client, GAsyncResult* res, gpointer user_data
 			}
 			g_free(path);
 		}
+	}
+	if (data->cancellable != NULL) {
+		g_object_unref(data->cancellable);
+		data->cancellable = NULL;
 	}
 }
 
@@ -305,16 +324,14 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 {
 	if (response == GTK_RESPONSE_ACCEPT)
 	{
+		LoadImg2ImgData *data = user_data;
 		GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
-
 		g_autoptr(GFile) png_file = gtk_file_chooser_get_file (chooser);
 
 		if (png_file != NULL) {
 			char *path = g_file_get_path(png_file);
 			if (path != NULL) {
-				LoadImg2ImgData *data = user_data;
-				GString *str = data->img2img_file_path;
-				g_string_assign(str, path);
+				g_string_assign(data->img2img_file_path, path);
 				GtkImage *prev_img = GTK_IMAGE(data->image_wgt);
 				if (check_file_exists(path, 0) == 1) {
 					gtk_image_set_from_file(prev_img, path);
@@ -344,13 +361,13 @@ void load_from_img_btn_cb(GtkWidget *btn, gpointer user_data)
 		gtk_file_filter_add_suffix (load_img_filter, "png");
 		gtk_file_filter_set_name(load_img_filter,"PNG");
 
-		GListStore* l = g_list_store_new (GTK_TYPE_FILE_FILTER);
-		g_list_store_append(l, load_img_filter);
-		gtk_file_dialog_set_filters(load_img_dialog, G_LIST_MODEL(l));
+		GListStore* filter_list_store = g_list_store_new (GTK_TYPE_FILE_FILTER);
+		g_list_store_append(filter_list_store, load_img_filter);
+		gtk_file_dialog_set_filters(load_img_dialog, G_LIST_MODEL(filter_list_store));
 
-		GCancellable* png_cancellable = g_cancellable_new();
+		data->cancellable = g_cancellable_new();
 
-		gtk_file_dialog_open(load_img_dialog, win, png_cancellable, (GAsyncReadyCallback)read_png_metadata, user_data);
+		gtk_file_dialog_open(load_img_dialog, win, data->cancellable, (GAsyncReadyCallback)read_png_metadata, user_data);
 	#else
 		LoadPNGData *data = user_data;
 		GtkWindow *win = GTK_WINDOW(data->win);
@@ -384,20 +401,20 @@ void load_img2img_btn_cb(GtkWidget *btn, gpointer user_data)
 		gtk_file_dialog_set_modal(load_img_dialog, TRUE);
 
 		GtkFileFilter *load_img_filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(load_img_filter,"Images (*.png, *.jpg)");
 		gtk_file_filter_add_suffix (load_img_filter, "png");
-		gtk_file_filter_set_name(load_img_filter,"PNG");
 		gtk_file_filter_add_suffix (load_img_filter, "jpg");
-		gtk_file_filter_set_name(load_img_filter,"JPG");
 
-		GListStore* l = g_list_store_new (GTK_TYPE_FILE_FILTER);
-		g_list_store_append(l, load_img_filter);
-		gtk_file_dialog_set_filters(load_img_dialog, G_LIST_MODEL(l));
+		GListStore *filter_list_store = g_list_store_new (GTK_TYPE_FILE_FILTER);
+		g_list_store_append(filter_list_store, load_img_filter);
+		gtk_file_dialog_set_filters(load_img_dialog, G_LIST_MODEL(filter_list_store));
+		g_object_unref(filter_list_store);
 
-		GCancellable* png_cancellable = g_cancellable_new();
+		data->cancellable = g_cancellable_new();
 
-		gtk_file_dialog_open(load_img_dialog, win, png_cancellable, (GAsyncReadyCallback)set_file_path, user_data);
+		gtk_file_dialog_open(load_img_dialog, win, data->cancellable, (GAsyncReadyCallback)set_file_path, user_data);
 	#else
-		LoadPNGData *data = user_data;
+		LoadImg2ImgData *data = user_data;
 		GtkWindow *win = GTK_WINDOW(data->win);
 
 		GtkWidget *load_img_dialog = gtk_file_chooser_dialog_new ("Choose the image:",
