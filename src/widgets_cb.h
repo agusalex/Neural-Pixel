@@ -49,6 +49,8 @@ void set_dropdown_selected_item(GtkWidget* wgt, GParamSpec *pspec, gpointer user
 
 void set_spin_value_to_var(GtkWidget *w, double *v);
 
+void show_error_message (GtkWidget *win, char *err_title_text, char *err_text);
+
 void hide_img_btn_cb(GtkButton *btn, gpointer user_data);
 
 void toggle_extra_options(GtkCheckButton *btn, gpointer user_data);

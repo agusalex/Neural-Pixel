@@ -5,6 +5,7 @@
 #include "global.h"
 #include "structs.h"
 #include "str_utils.h"
+#include "widgets_cb.h"
 
 static int img_n = 1;
 static int img_t = 1;
@@ -30,25 +31,8 @@ static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_
 				char error_dialog_text[16 + strlen(file_name)];
 				strcpy(error_dialog_text, "Error loading: ");
 				strcat(error_dialog_text, file_name);
-
-				#if GTK_CHECK_VERSION(4, 10, 0)
-					GtkAlertDialog *file_loading_error_dialog = gtk_alert_dialog_new ("Error loading file");
-					gtk_alert_dialog_set_detail (file_loading_error_dialog, error_dialog_text);
-					gtk_alert_dialog_show (file_loading_error_dialog, GTK_WINDOW(data->win));
-					g_object_unref(file_loading_error_dialog);
-				#else
-					GtkWidget *file_loading_error_dialog = gtk_message_dialog_new(
-					GTK_WINDOW(data->win),
-					GTK_DIALOG_MODAL,
-					GTK_MESSAGE_ERROR,
-					GTK_BUTTONS_CLOSE,
-					"Error loading file"
-					);
-
-					gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(file_loading_error_dialog), error_dialog_text);
-					g_signal_connect (file_loading_error_dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
-					gtk_widget_show(file_loading_error_dialog);
-				#endif
+				
+				show_error_message(data->win, "Error loading file", error_dialog_text);
 			}
 			g_free(err_string);
 		}

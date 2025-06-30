@@ -12,33 +12,42 @@
 
 static void set_png_metadata(GFile *png_file, gpointer user_data)
 {
+	LoadPNGData *data = user_data;
 	char *path = g_file_get_path(png_file);
 
 	FILE *fp = fopen(path, "rb");
 	if (!fp) {
-		perror("File opening failed");
-		exit(1);
+		fprintf(stderr, "File opening failed.\n");
+		g_free(path);
+		show_error_message (data->win, "Error loading PNG info", "File opening failed");
+		return;
 	}
 
 	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!png) {
-		perror("png_create_read_struct failed");
+		fprintf(stderr, "png_create_read_struct failed.\n");
 		fclose(fp);
+		g_free(path);
+		show_error_message (data->win, "Error loading PNG info", "png_create_read_struct failed");
 		return;
 	}
 
 	png_infop info = png_create_info_struct(png);
 	if (!info) {
-		perror("png_create_info_struct failed");
+		fprintf(stderr, "png_create_info_struct failed.\n");
 		png_destroy_read_struct(&png, NULL, NULL);
 		fclose(fp);
+		g_free(path);
+		show_error_message (data->win, "Error loading PNG info", "png_create_info_struct failed");
 		return;
 	}
 
 	if (setjmp(png_jmpbuf(png))) {
-		perror("Error during PNG creation");
+		fprintf(stderr, "Error during PNG initialization.\n");
 		png_destroy_read_struct(&png, &info, NULL);
 		fclose(fp);
+		g_free(path);
+		show_error_message (data->win, "Error loading PNG info", "Error during PNG initialization");
 		return;
 	}
 
@@ -55,8 +64,7 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 		g_string_append_printf(l1, "%s %s", text[i].key, text[i].text);
 	}
 
-	LoadPNGData *data = user_data;
-
+	int n_err = 0;
 	const char *ptr;
 
 	//Set Positive Prompt
@@ -76,10 +84,12 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 			GtkTextBuffer *ptb = data->pos_tb;
 			gtk_text_buffer_set_text (ptb, pprompt, -1);
 		} else {
-			perror("Failed to parse positive prompt data.");
+			fprintf(stderr, "Failed to parse positive prompt data.\n");
+			n_err++;
 		}
 	} else {
-		perror("Failed to parse positive prompt data.");
+		fprintf(stderr, "Failed to parse positive prompt data.\n");
+		n_err++;
 	}
 	
 	
@@ -100,10 +110,12 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 			GtkTextBuffer *ntb = data->neg_tb;
 			gtk_text_buffer_set_text (ntb, nprompt, -1);
 		} else {
-			perror("Failed to parse negative prompt data.");
+			fprintf(stderr, "Failed to parse negative prompt data.\n");
+			n_err++;
 		}
 	} else {
-		perror("Failed to parse negative prompt data.");
+		fprintf(stderr, "Failed to parse negative prompt data.\n");
+		n_err++;
 	}
 	
 	//Set Steps
@@ -119,10 +131,12 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 			GtkWidget *steps_dd = data->steps_dd;
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(steps_dd), steps_index);
 		} else {
-			perror("Failed to parse steps data.");
+			fprintf(stderr, "Failed to parse steps data.\n");
+			n_err++;
 		}
 	} else {
-		perror("Failed to parse steps data.");
+		fprintf(stderr, "Failed to parse steps data.\n");
+		n_err++;
 	}
 	
 	//Set CFG Value
@@ -133,10 +147,12 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 			GtkWidget *cfg_spin = data->cfg_spin;
 			gtk_spin_button_set_value (GTK_SPIN_BUTTON(cfg_spin), cfg_double);
 		} else {
-			perror("Failed to parse CFG data.");
+			fprintf(stderr, "Failed to parse CFG data.\n");
+			n_err++;
 		}
 	} else {
-		perror("Failed to parse CFG data.");
+		fprintf(stderr, "Failed to parse CFG data.\n");
+		n_err++;
 	}
 	
 	//Set Seed Value
@@ -147,10 +163,12 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 			GtkWidget *seed_spin = data->seed_spin;
 			gtk_spin_button_set_value (GTK_SPIN_BUTTON(seed_spin), seed_long);
 		} else {
-			perror("Failed to parse seed data.");
+			fprintf(stderr, "Failed to parse seed data.\n");
+			n_err++;
 		}
 	} else {
-		perror("Failed to parse seed data.");
+		fprintf(stderr, "Failed to parse seed data.\n");
+		n_err++;
 	}
 	
 	//Set IMG Size
@@ -173,10 +191,12 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(width_dd), width_index);
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(height_dd), height_index);
 		} else {
-			perror("Failed to parse image size data.");
+			fprintf(stderr, "Failed to parse image size data.\n");
+			n_err++;
 		}
 	} else {
-		perror("Failed to parse image size data.");
+		fprintf(stderr, "Failed to parse image size data.\n");
+		n_err++;
 	}
 	
 	//Set SD Model
@@ -198,10 +218,12 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 			int model_i = check_gtk_list_contains_item(model_items, model_str);
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(model_dd), model_i);
 		} else {
-			perror("Failed to parse model data.");
+			fprintf(stderr, "Failed to parse model data.\n");
+			n_err++;
 		}
 	} else {
-		perror("Failed to parse model data.");
+		fprintf(stderr, "Failed to parse model data.\n");
+		n_err++;
 	}
 	
 	//Set Sampler and Schedule
@@ -219,21 +241,24 @@ static void set_png_metadata(GFile *png_file, gpointer user_data)
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(sample_dd), sample_index);
 			gtk_drop_down_set_selected(GTK_DROP_DOWN(schedule_dd), schedule_index);
 		} else {
-			perror("Failed to parse sampler data.");
+			fprintf(stderr, "Failed to parse sampler data.\n");
+			n_err++;
 		}
 	} else {
-		perror("Failed to parse sampler data.");
+		fprintf(stderr, "Failed to parse sampler data.\n");
+		n_err++;
 	}
 
 	png_destroy_read_struct(&png, &info, NULL);
 	fclose(fp);
+	g_free(path);
 	g_string_free(l1, TRUE);
 }
 
 #if GTK_CHECK_VERSION(4, 10, 0)
 static void read_png_metadata(GObject* client, GAsyncResult* res, gpointer user_data)
 {
-	GFile *png_file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(client), res, NULL);
+	g_autoptr(GFile) png_file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(client), res, NULL);
 
 	if (png_file != NULL) {
 		set_png_metadata(png_file, user_data);

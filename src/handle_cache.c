@@ -14,7 +14,7 @@ void create_cache(char *n)
 {
 	DIR* cd = opendir(".cache");
 	if (cd == NULL) {
-		perror("Error \".cache\" directory does not exist.");
+		fprintf(stderr, "Error \".cache\" directory does not exist.\n");
 		exit(1);
 	}
 	closedir(cd);
@@ -22,7 +22,7 @@ void create_cache(char *n)
 	if (strcmp(n, ".cache/pp_cache") == 0) {
 		FILE *pcf = fopen(".cache/pp_cache", "wb");
 		if (pcf == NULL) {
-			perror("fopen");
+			fprintf(stderr, "Failed to open file \".cache/pp_cache\".\n");
 			exit(1);
 		}
 		fprintf(pcf, "%s", POSITIVE_PROMPT);
@@ -32,7 +32,7 @@ void create_cache(char *n)
 	if (strcmp(n, ".cache/np_cache") == 0) {
 		FILE *ncf = fopen(".cache/np_cache", "wb");
 		if (ncf == NULL) {
-			perror("fopen");
+			fprintf(stderr, "Failed to open file \".cache/np_cache\".\n");
 			exit(1);
 		}
 		fprintf(ncf, "%s", NEGATIVE_PROMPT);
@@ -42,7 +42,7 @@ void create_cache(char *n)
 	if (strcmp(n, ".cache/img_cache") == 0) {
 		FILE *imgcf = fopen(".cache/img_cache", "wb");
 		if (imgcf == NULL) {
-			perror("fopen");
+			fprintf(stderr, "Failed to open file \".cache/img_cache\".\n");
 			exit(1);
 		}
 		fprintf(imgcf, "%s", DEFAULT_IMG_PATH);
@@ -52,7 +52,7 @@ void create_cache(char *n)
 	if (strcmp(n, ".cache/sd_cache") == 0) {
 		FILE *cf = fopen(".cache/sd_cache", "wb");
 		if (cf == NULL) {
-			perror("fopen");
+			fprintf(stderr, "Failed to open file \".cache/sd_cache\".\n");
 			exit(1);
 		}
 		fprintf(cf, "%s\n", OPTIONAL_ITEMS);
@@ -89,7 +89,7 @@ void load_pp_cache(GtkTextBuffer *pos_tb)
 	if (check_file_exists(".cache/pp_cache", 1) == 1) {
 		FILE *pcf = fopen(".cache/pp_cache", "r");
 		if (pcf == NULL) {
-			perror("Failed to open file");
+			fprintf(stderr, "Failed to open file \".cache/pp_cache\".\n");
 			exit(1);
 		}
 		char line[512];
@@ -100,13 +100,13 @@ void load_pp_cache(GtkTextBuffer *pos_tb)
 		fseek(pcf, 0, SEEK_SET);
 		char *pb = (char *)malloc(pcf_size + 1);
 		if (pb == NULL) {
-			perror("Memory allocation failed");
+			fprintf(stderr, "Memory allocation failed");
 			fclose(pcf);
 			exit(1);
 		}
 		size_t pbr = fread(pb, 1, pcf_size, pcf);
 		if (pbr != pcf_size) {
-			perror("Error reading the file");
+			fprintf(stderr, "Error reading the file");
 			free(pb);
 			fclose(pcf);
 			exit(1);
@@ -127,7 +127,7 @@ void load_np_cache(GtkTextBuffer *neg_tb)
 	if (check_file_exists(".cache/np_cache", 1) == 1) {
 		FILE *ncf = fopen(".cache/np_cache", "r");
 		if (ncf == NULL) {
-			perror("Failed to open file");
+			fprintf(stderr, "Failed to open file \".cache/np_cache\".\n");
 			exit(1);
 		}
 		char line[512];
@@ -138,13 +138,13 @@ void load_np_cache(GtkTextBuffer *neg_tb)
 		fseek(ncf, 0, SEEK_SET);
 		char *nb = (char *)malloc(ncf_size + 1);
 		if (nb == NULL) {
-			perror("Memory allocation failed");
+			fprintf(stderr, "Memory allocation failed");
 			fclose(ncf);
 			exit(1);
 		}
 		size_t nbr = fread(nb, 1, ncf_size, ncf);
 		if (nbr != ncf_size) {
-			perror("Error reading the file");
+			fprintf(stderr, "Error reading the file");
 			free(nb);
 			fclose(ncf);
 			exit(1);
@@ -165,7 +165,7 @@ GtkWidget* load_img_cache(GtkWidget *img_wgt)
 	if (check_file_exists(".cache/img_cache", 1) == 1) {
 		FILE *imgf = fopen(".cache/img_cache", "r");
 		if (imgf == NULL) {
-			perror("Failed to open file");
+			fprintf(stderr, "Failed to open file \".cache/img_cache\".\n");
 			exit(1);
 		}
 		char line[128];
@@ -193,7 +193,7 @@ void load_cache(gpointer user_data)
 	if (check_file_exists(".cache/sd_cache", 1) == 1) {
 		FILE *cf = fopen(".cache/sd_cache", "r");
 		if (cf == NULL) {
-			perror("Failed to open file");
+			fprintf(stderr, "Failed to open file \".cache/sd_cache\".\n");
 			exit(1);
 		}
 		char line[128];
@@ -270,7 +270,7 @@ void update_cache(GenerationData *data, gchar *sel_model, gchar *sel_vae, gchar 
 	FILE *imgcf = fopen(".cache/img_cache", "wb");
 	FILE *cf = fopen(".cache/sd_cache", "wb");
 	if (pcf == NULL || ncf == NULL || imgcf == NULL || cf == NULL) {
-		perror("fopen");
+		fprintf(stderr, "fopen");
 		exit(1);
 	}
 

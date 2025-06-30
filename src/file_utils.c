@@ -16,7 +16,7 @@ int is_file_empty(const char *fn)
 {
 	FILE *f = fopen(fn, "r");
 	if (f == NULL) {
-		perror("Error opening file");
+		fprintf(stderr, "Error opening file.\n");
 		return -1;
 	}
 	fseek(f, 0, SEEK_END);
@@ -122,7 +122,7 @@ DIR* check_create_dir(const char* path)
 	if (dir == NULL) {
 		#ifdef _WIN32
 			if (mkdir(path) != 0) {
-				perror("Error creating directory");
+				fprintf(stderr, "Error creating directory.\n");
 				return NULL;
 			}
 			
@@ -130,7 +130,7 @@ DIR* check_create_dir(const char* path)
 			return ndir;
 		#else
 			if (mkdir(path, 0777) != 0) {
-				perror("Error creating directory");
+				fprintf(stderr, "Error creating directory.\n");
 				return NULL;
 			}
 			
@@ -147,12 +147,12 @@ int check_create_base_dirs() {
 	if (cache_dir == NULL) {
 		#ifdef _WIN32
 			if (mkdir(CACHE_PATH) != 0) {
-				perror("Error creating required \".cache\" directory.");
+				fprintf(stderr, "Error creating required \".cache\" directory.\n");
 				return 1;
 			}
 		#else
 			if (mkdir(CACHE_PATH, 0777) != 0) {
-				perror("Error creating required \".cache\" directory.");
+				fprintf(stderr, "Error creating required \".cache\" directory.\n");
 				return 1;
 			}
 		#endif
@@ -163,12 +163,12 @@ int check_create_base_dirs() {
 	if (models_dir == NULL) {
 		#ifdef _WIN32
 			if (mkdir(MODELS_PATH) != 0) {
-				perror("Error creating required \"models\" directory.");
+				fprintf(stderr, "Error creating required \"models\" directory.\n");
 				return 1;
 			}
 		#else
 			if (mkdir(MODELS_PATH, 0777) != 0) {
-				perror("Error creating required \"models\" directory.");
+				fprintf(stderr, "Error creating required \"models\" directory.\n");
 				return 1;
 			}
 		#endif
@@ -179,12 +179,12 @@ int check_create_base_dirs() {
 	if (outputs_dir == NULL) {
 		#ifdef _WIN32
 			if (mkdir(OUTPUTS_PATH) != 0) {
-				perror("Error creating required \"outputs\" directory.");
+				fprintf(stderr, "Error creating required \"outputs\" directory.\n");
 				return 1;
 			}
 		#else
 			if (mkdir(OUTPUTS_PATH, 0777) != 0) {
-				perror("Error creating required \"outputs\" directory.");
+				fprintf(stderr, "Error creating required \"outputs\" directory.\n");
 				return 1;
 			}
 		#endif
