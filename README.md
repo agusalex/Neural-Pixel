@@ -51,8 +51,8 @@ You can directly run the "neural pixel" binary, but the variable that defines th
 
 ## Recommended checkpoints
 
-- For realistic style: [photon](https://huggingface.co/sam749/Photon-v1/blob/main/photon_v1.safetensors).
-- For anime style [sotemix](https://civitai.com/models/72182/sotemix).
+- For realistic style: [Photon](https://huggingface.co/sam749/Photon-v1/blob/main/photon_v1.safetensors).
+- For anime style: [SoteMix](https://civitai.com/models/72182/sotemix).
 
 ## Build
 
@@ -62,7 +62,7 @@ mkdir build && cd build && cmake .. && make
 ```
 To build on Windows Use MSYS2.
 
-To compile sd.cpp follow the instructions on its github page: [Stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
+To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
 ## Notes
 
@@ -72,11 +72,11 @@ To compile sd.cpp follow the instructions on its github page: [Stable-diffusion.
 
 ## Credits
 
--This project is a GUI to [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp) by [@leejet](https://github.com/leejet).
+- This project is a GUI to [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp) by [@leejet](https://github.com/leejet).
 
 ## Donations
 
-- [My PayPal](https://www.paypal.com/donate/?hosted_button_id=G29L2QHNWDJHJ).
+- My PayPal: [link](https://www.paypal.com/donate/?hosted_button_id=G29L2QHNWDJHJ).
 
 - Bitcoin
 ```
