@@ -15,6 +15,8 @@ char *convert_double_to_string(double n, char *str_format);
 
 char *format_lora_embedding_string(const gchar* item, int tb_type);
 
+char* generate_sd_seed();
+
 char *get_time_str();
 
 const char **trim_dropdown_strings(const char* const* items, int n_files, int str_size);

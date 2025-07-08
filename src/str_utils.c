@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+	#include <process.h>
+	#define getpid _getpid
+#endif
 
 int check_list_contains_item(const char* const* list, const char* item)
 {
@@ -140,16 +144,58 @@ char *format_lora_embedding_string(const gchar* item, int tb_type)
 	return f_str;
 }
 
+char* generate_sd_seed()
+{
+	long long int seed;
+	const pid_t pid = getpid();
+
+	#ifdef _WIN32
+		seed = (long long int)time(NULL);
+	#else
+		struct timespec ts;
+		if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+			seed = (long long int)ts.tv_sec * 1000000000LL + ts.tv_nsec;
+		} else {
+			seed = (long long int)time(NULL);
+			seed ^= (long long int)clock();
+		}
+	#endif
+
+	seed ^ ((long long int)pid << 16);
+	
+	char *seed_str = malloc(21);
+	if (!seed_str) {
+		return NULL;
+	}
+
+	int success = snprintf(seed_str, 21, "%lld", seed);
+	if (success < 0 || success >= 22) {
+		free(seed_str);
+		return NULL;
+	}
+	return seed_str;
+}
+
 char *get_time_str()
 {
 	time_t rt;
-	struct tm *timeinfo;
+	struct tm timeinfo;
+
 	time(&rt);
-	timeinfo = localtime(&rt);
-	char f_time[20];
-	strftime(f_time, 20, "%d-%m-%Y_%H:%M:%S", timeinfo);
-	char *t = malloc(strlen(f_time) + 1);
-	strcpy(t, f_time);
+	if (localtime_r(&rt, &timeinfo) == NULL) {
+	return NULL;
+	}
+
+	char *t = malloc(16);
+	if (t == NULL) {
+	return NULL;
+	}
+
+	if (strftime(t, 16, "%Y%m%d_%H%M%S", &timeinfo) == 0) {
+	free(t);
+	return NULL;
+	}
+
 	return t;
 }
 

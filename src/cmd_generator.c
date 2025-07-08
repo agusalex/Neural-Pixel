@@ -26,7 +26,14 @@ GString *gen_sd_string(GenerationData *data)
 	
 	char *cfg_str = convert_double_to_string(*data->cfg_value, "%.1f");
 	char *denoise_str = convert_double_to_string(*data->denoise_value, "%.2f");
-	char *seed_str = convert_double_to_string(*data->seed_value, "%.0f");
+	
+	char *seed_str;
+	if (*data->seed_value == -1.0) {
+		seed_str = generate_sd_seed();
+	} else {
+		seed_str = convert_double_to_string(*data->seed_value, "%.0f");
+	}
+	
 	char *up_repeat_str = convert_double_to_string(*data->up_repeat_value, "%.0f");
 
 	GString *l1 = g_string_new(NULL);
@@ -114,7 +121,11 @@ GString *gen_sd_string(GenerationData *data)
 		g_string_append_printf(l1, "|--schedule|%s", LIST_SCHEDULES[(*data->schedule_index)]);
 	}
 	
-	g_string_append_printf(l1,"|-s|%s", seed_str);
+	if (seed_str != NULL) {
+		g_string_append_printf(l1,"|-s|%s", seed_str);
+	} else {
+		g_string_append(l1,"|-s|-1");
+	}
 	
 	if (*data->n_steps_index < LIST_STEPS_STR_COUNT - 1) {
 		g_string_append_printf(l1, "|--steps|%s", LIST_STEPS_STR[(*data->n_steps_index)]);
@@ -146,24 +157,25 @@ GString *gen_sd_string(GenerationData *data)
 	if (n_text != NULL) {
 		g_string_append_printf(l1, "|-n|\"%s\"", n_text);
 	}
-
-	int n_img_count = count_output_files();
-	char *n_img_string = convert_int_to_string(n_img_count);
+	
+	char *timestamp = get_time_str();
 	
 	#ifdef G_OS_WIN32
-		g_string_append_printf(l1, "|-o|.\\outputs\\IMG_%s.png", n_img_string);
+		g_string_append_printf(l1, "|-o|.\\outputs\\IMG_%s.png", timestamp);
 	#else
-		g_string_append_printf(l1, "|-o|./outputs/IMG_%s.png", n_img_string);
+		g_string_append_printf(l1, "|-o|./outputs/IMG_%s.png", timestamp);
 	#endif
 
-	update_cache(data, data->model_string->str, data->vae_string->str, data->cnet_string->str, data->upscale_string->str, data->clip_l_string->str, data->clip_g_string->str, data->t5xxl_string->str, p_text, n_text, n_img_string);
+	update_cache(data, data->model_string->str, data->vae_string->str, data->cnet_string->str, data->upscale_string->str, data->clip_l_string->str, data->clip_g_string->str, data->t5xxl_string->str, p_text, n_text, timestamp);
 
 	g_free(p_text);
 	g_free(n_text);
-	free(n_img_string);
+	free(timestamp);
 	free(cfg_str);
 	free(denoise_str);
-	free(seed_str);
+	if (seed_str != NULL) {
+		free(seed_str);
+	}
 	free(up_repeat_str);
 	
 	if (*data->verbose_bool == 1) {
