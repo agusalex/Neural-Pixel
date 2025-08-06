@@ -107,8 +107,8 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 					
 					snprintf(progress_label,
 					sizeof(progress_label),
-					"Sampling... %d%% (%d/%d)",
-					percentage, img_n, img_t);
+					"Sampling... %d%% (%d/%d) at %.2f%s",
+					percentage, img_n, img_t, time_or_speed, unit);
 					
 					gtk_button_set_label(GTK_BUTTON(data->button), progress_label);
 
@@ -144,6 +144,10 @@ static void on_subprocess_end(GObject* source_object, GAsyncResult* res, gpointe
 		if (check_file_exists(data->result_img_path, 0) == 1) {
 			gtk_image_set_from_file(prev_img, data->result_img_path);
 		} else {
+			g_printerr(
+				"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
+				data->result_img_path
+			);
 			gtk_image_set_from_file(prev_img, "./resources/example.png");
 		}
 	}

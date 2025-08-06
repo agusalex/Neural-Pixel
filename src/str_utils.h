@@ -19,6 +19,4 @@ char* generate_sd_seed();
 
 char *get_time_str();
 
-const char **trim_dropdown_strings(const char* const* items, int n_files, int str_size);
-
 #endif // STR_UTILS_H

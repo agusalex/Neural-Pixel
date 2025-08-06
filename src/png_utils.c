@@ -294,6 +294,10 @@ static void set_file_path(GObject* client, GAsyncResult* res, gpointer user_data
 			if (check_file_exists(path, 0) == 1) {
 				gtk_image_set_from_file(prev_img, path);
 			} else {
+				g_printerr(
+					"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
+					path
+				);
 				gtk_image_set_from_file(prev_img, "./resources/example.png");
 			}
 			g_free(path);
@@ -336,6 +340,10 @@ static void set_file_path_deprecated(GtkDialog* dialog, int response, gpointer u
 				if (check_file_exists(path, 0) == 1) {
 					gtk_image_set_from_file(prev_img, path);
 				} else {
+					g_printerr(
+						"Error loading image: The file '%s' is missing, corrupted, or invalid.\n",
+						data->result_img_path
+					);
 					gtk_image_set_from_file(prev_img, "./resources/example.png");
 				}
 				g_free(path);

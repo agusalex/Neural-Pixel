@@ -80,21 +80,36 @@ int count_output_files()
 	return nf;
 }
 
-int check_file_exists(char *fn, int tf)
+int check_file_exists(char *filename, int is_text_file)
 {
-	if (access(fn, F_OK) == 0) {
-		if (tf == 1) {
-			if (is_file_empty(fn) == 1) {
-				create_cache(fn);
+	/* Check if file exists */
+	if (access(filename, F_OK) == 0) {
+		/* If it's a text file, verify it's not empty and initialize if needed */
+		if (is_text_file == 1) {
+			if (is_file_empty(filename) == 1) {
+				GError *err = NULL;
+				create_cache(filename, &err);
+				if (err != NULL) {
+					g_printerr("Error: %s\n", err->message);
+					g_error_free(err);
+					return 0;
+				}
 			}
 		}
-		return 1;
+		return 1;  // File exists
 	} else {
-		if (tf == 1) {
-			create_cache(fn);
-			return 1;
+		/* If file doesn't exist but should be a text file, create it */
+		if (is_text_file == 1) {
+			GError *err = NULL;
+			create_cache(filename, &err);
+			if (err != NULL) {
+				g_printerr("Error: %s\n", err->message);
+				g_error_free(err);
+				return 0;
+			}
+			return 1;  // File was created
 		}
-		return 0;
+		return 0;  // File doesn't exist
 	}
 }
 

@@ -198,37 +198,3 @@ char *get_time_str()
 
 	return t;
 }
-
-const char **trim_dropdown_strings(const char* const* items, int n_files, int str_size)
-{
-	const char **n_items = malloc(sizeof(char*) * (n_files + 1));
-	if (n_items == NULL) {
-		fprintf(stderr, "Memory allocation failed\n");
-		return NULL;
-	}
-
-	for (int i = 0; items[i] != NULL; i++) {
-		int str_len = strlen(items[i]);
-		char *str = malloc(str_len + 1);
-		if (str == NULL) {
-			fprintf(stderr, "Memory allocation failed\n");
-			exit(1);
-		}
-		if (str_len > str_size) {
-			strncpy(str, items[i], str_size - 1);
-			str[str_size - 1] = '\0';
-			if (str_size > 3) {
-				str[str_size - 3] = '.';
-				str[str_size - 2] = '.';
-			}
-		} else {
-			strncpy(str, items[i], str_len + 1);
-			str[str_len] = '\0';
-		}
-		n_items[i] = strdup(str);
-		free(str);
-	}
-
-	n_items[n_files] = NULL;
-	return n_items;
-}
