@@ -75,7 +75,7 @@ This repo now includes a minimal web server exposing a subset of AUTOMATIC1111â€
   - `./models/checkpoints` (required)
   - `./models/vae`, `./models/loras`, `./models/embeddings`, etc.
 - Outputs go to `./outputs`.
-- The container expects `sd` (Vulkan) and/or `sd-cpu` binaries to be mounted at `/app/sd` and `/app/sd-cpu` respectively.
+- The image now includes `sd` (Vulkan) and `sd-cpu` binaries prebuilt and available on PATH and at `/app/sd` and `/app/sd-cpu`. You no longer need to mount them.
 
 ### Layout expected inside `./models`
 
@@ -92,11 +92,9 @@ models/
 
 ### Run with Docker Compose
 
-1) Place your compiled `sd` (Vulkan) binary at `./sd` (and optionally `sd-cpu` at `./sd-cpu`).
+1) Put your models under `./models/checkpoints`, `./models/vae`, etc.
 
-2) Put your models under `./models/checkpoints`, `./models/vae`, etc.
-
-3) Start using the published image:
+2) Start using the published image:
 
 ```
 docker compose up -d
@@ -141,14 +139,13 @@ docker run -d --name neural-pixel \
   ghcr.io/agusalex/neural-pixel:latest
 ```
 
-- CPU fallback (provide `./sd-cpu`):
+- CPU fallback:
 
 ```
 docker run -d --name neural-pixel-cpu \
   -p 7860:7860 \
   -v "$PWD/models:/app/models:ro" \
   -v "$PWD/outputs:/app/outputs" \
-  -v "$PWD/sd-cpu:/app/sd-cpu:ro" \
   ghcr.io/agusalex/neural-pixel:latest
 ```
 

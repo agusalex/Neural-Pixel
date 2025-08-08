@@ -11,8 +11,7 @@ services:
     volumes:
       - ./models:/app/models:ro
       - ./outputs:/app/outputs
-      - ./sd:/app/sd:ro
-      - ./sd-cpu:/app/sd-cpu:ro
+    # sd and sd-cpu are now baked into the image; no need to mount them
     # For NVIDIA GPUs; remove if not needed
     device_requests:
       - driver: nvidia
