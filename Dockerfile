@@ -21,9 +21,7 @@ COPY web /app/web
 RUN mkdir -p /app/models /app/outputs
 VOLUME ["/app/models", "/app/outputs"]
 
-# Copy sd binaries if provided at build-time (optional). Otherwise expect to mount or use PATH.
-# Placeholders for sd / sd-cpu binaries
-COPY --chmod=755 resources/neural_pixel.bat /dev/null || true
+# sd / sd-cpu binaries are expected to be provided at runtime via volume mounts or PATH
 
 ENV PYTHONUNBUFFERED=1 \
     MODELS_DIR=/app/models \
