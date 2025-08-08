@@ -7,9 +7,6 @@
 #include "str_utils.h"
 #include "widgets_cb.h"
 
-static int img_n = 1;
-static int img_t = 1;
-
 static void handle_stderr(GObject* stream_obj, GAsyncResult* res, gpointer user_data)
 {
 	SDProcessErrorData *data = user_data;
@@ -84,12 +81,12 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 			printf("%s\n", out_string);
 		}
 
-		if (strstr(out_string, "sampling completed") != NULL && img_n == img_t) {
+		if (strstr(out_string, "sampling completed") != NULL && data->img_n == data->img_t) {
 			gtk_button_set_label(GTK_BUTTON(data->button), "Decoding latent(s)...");
 		} else if (strstr(out_string, "generating image:") != NULL) {
 			long int img_seed;
 			const char *last_colon = strrchr(out_string, ':');
-			if (last_colon && sscanf(last_colon + 1, " %i/%i - seed %ld", &img_n, &img_t, &img_seed) == 3) {
+			if (last_colon && sscanf(last_colon + 1, " %i/%i - seed %ld", &data->img_n, &data->img_t, &img_seed) == 3) {
 				g_data_input_stream_set_newline_type(G_DATA_INPUT_STREAM(data->out_pipe_stream), G_DATA_STREAM_NEWLINE_TYPE_CR);
 			} else {
 				fprintf(stderr, "Error: Could not parse batch size from line: %s\n", out_string);
@@ -99,16 +96,15 @@ static void show_progress(GObject* stream_obj, GAsyncResult* res, gpointer user_
 			if (last_pipe) {
 				int step, steps;
 				float time_or_speed;
-				char unit[20];
+				char unit_part1[10], unit_part2[10];
 
-				if (sscanf(last_pipe + 1, " %i/%i - %f%19s", &step, &steps, &time_or_speed, unit) == 4 && steps < 61) {
+				if (sscanf(last_pipe + 1, " %i/%i - %f%9[^/]/%9[ -~]", &step, &steps, &time_or_speed, unit_part1, unit_part2) == 5 && steps < 61) {
 					int percentage = (int)(((float)step / steps) * 100 + 0.5);
 					char progress_label[64];
 					
-					snprintf(progress_label,
-					sizeof(progress_label),
-					"Sampling... %d%% (%d/%d) at %.2f%s",
-					percentage, img_n, img_t, time_or_speed, unit);
+					int written = snprintf(progress_label,
+					sizeof(progress_label), "Sampling... %d%% (%d/%d) at %.2f%s/%s",
+					percentage, data->img_n, data->img_t, time_or_speed, unit_part1, unit_part2);
 					
 					gtk_button_set_label(GTK_BUTTON(data->button), progress_label);
 
@@ -268,6 +264,8 @@ void generate_cb(GtkButton *gen_btn, gpointer user_data)
 		check_d->halt_btn = data->halt_btn;
 		
 		SDProcessOutputData *output_d = g_new0 (SDProcessOutputData, 1);
+		output_d->img_n = 1;
+		output_d->img_t = 1;
 		output_d->verbose_bool = *data->verbose_bool;
 		output_d->button = GTK_WIDGET(gen_btn);
 		output_d->sdpid = npid;

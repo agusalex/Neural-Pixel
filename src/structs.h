@@ -171,6 +171,8 @@ typedef struct {
 } ResetCbData;
 
 typedef struct {
+	int img_n;
+	int img_t;
 	int verbose_bool;
 	GtkWidget *button;
 	int sdpid;
