@@ -2,6 +2,8 @@
 
 # Neural-Pixel
 **A simple GUI wrapper for stable-diffusion.cpp written using C and GTK 4.**
+
+[![ghcr](https://img.shields.io/badge/ghcr.io-agusalex%2Fneural--pixel-2f5dff?logo=github)](https://github.com/users/agusalex/packages/container/package/neural-pixel)
 ![Screenshot1](https://github.com/Luiz-Alcantara/Neural-Pixel/blob/main/screenshots/img1.png?raw=true)
 </div>
 
@@ -94,10 +96,9 @@ models/
 
 2) Put your models under `./models/checkpoints`, `./models/vae`, etc.
 
-3) Build and start:
+3) Start using the published image:
 
 ```
-docker compose build
 docker compose up -d
 ```
 
@@ -119,6 +120,37 @@ POST http://localhost:7860/sdapi/v1/txt2img
 Notes:
 - NVIDIA GPUs inside Docker: ensure `--gpus all` or compose `device_requests` is configured, and host drivers are installed. For AMD/Intel (Mesa/Vulkan), pass-through `/dev/dri` and Vulkan ICDs as needed.
 - The current server implements a subset of the A1111 API focused on txt2img/img2img. Extend `web/app/main.py` to add more endpoints as required.
+
+### Direct Docker run (without compose)
+
+- Pull the image (example tag):
+
+```
+docker pull ghcr.io/agusalex/neural-pixel:sha-d0ec575
+```
+
+- Run with NVIDIA GPU (Vulkan backend binary at `./sd`):
+
+```
+docker run -d --name neural-pixel \
+  --gpus all \
+  -p 7860:7860 \
+  -v "$PWD/models:/app/models:ro" \
+  -v "$PWD/outputs:/app/outputs" \
+  -v "$PWD/sd:/app/sd:ro" \
+  ghcr.io/agusalex/neural-pixel:latest
+```
+
+- CPU fallback (provide `./sd-cpu`):
+
+```
+docker run -d --name neural-pixel-cpu \
+  -p 7860:7860 \
+  -v "$PWD/models:/app/models:ro" \
+  -v "$PWD/outputs:/app/outputs" \
+  -v "$PWD/sd-cpu:/app/sd-cpu:ro" \
+  ghcr.io/agusalex/neural-pixel:latest
+```
 
 ## Notes
 

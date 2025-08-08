@@ -1,8 +1,7 @@
 version: "3.9"
 services:
   neural-pixel-web:
-    build: .
-    image: neural-pixel-web:latest
+    image: ghcr.io/agusalex/neural-pixel:latest
     container_name: neural-pixel-web
     ports:
       - "7860:7860"
@@ -14,6 +13,7 @@ services:
       - ./outputs:/app/outputs
       - ./sd:/app/sd:ro
       - ./sd-cpu:/app/sd-cpu:ro
+    # For NVIDIA GPUs; remove if not needed
     device_requests:
       - driver: nvidia
         count: -1
