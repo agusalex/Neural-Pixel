@@ -64,6 +64,62 @@ To build on Windows Use MSYS2.
 
 To build sd.cpp follow the instructions on its github page: [Stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
+## Web server (Docker) – A1111-style API powered by Vulkan sd.cpp
+
+This repo now includes a minimal web server exposing a subset of AUTOMATIC1111’s API endpoints and a simple UI, but running the Vulkan `sd.cpp` backend. It serves endpoints like `/sdapi/v1/txt2img`, `/sdapi/v1/img2img`, `/sdapi/v1/samplers`, `/sdapi/v1/sd-models`, etc.
+
+- Endpoints live at port `7860` by default.
+- Models are read from `./models` (same layout used by the GUI):
+  - `./models/checkpoints` (required)
+  - `./models/vae`, `./models/loras`, `./models/embeddings`, etc.
+- Outputs go to `./outputs`.
+- The container expects `sd` (Vulkan) and/or `sd-cpu` binaries to be mounted at `/app/sd` and `/app/sd-cpu` respectively.
+
+### Layout expected inside `./models`
+
+```
+models/
+  checkpoints/
+  vae/
+  loras/
+  embeddings/
+  text_encoders/
+  controlnet/
+  upscale_models/
+```
+
+### Run with Docker Compose
+
+1) Place your compiled `sd` (Vulkan) binary at `./sd` (and optionally `sd-cpu` at `./sd-cpu`).
+
+2) Put your models under `./models/checkpoints`, `./models/vae`, etc.
+
+3) Build and start:
+
+```
+docker compose build
+docker compose up -d
+```
+
+Open `http://localhost:7860` for the minimal UI. Programmatic access via A1111-like API, e.g.:
+
+```
+POST http://localhost:7860/sdapi/v1/txt2img
+{
+  "prompt": "a photo of a cat",
+  "width": 512,
+  "height": 512,
+  "steps": 30,
+  "sampler_name": "dpm++2m",
+  "scheduler": "karras",
+  "model": "your_model.safetensors"  // file under models/checkpoints
+}
+```
+
+Notes:
+- NVIDIA GPUs inside Docker: ensure `--gpus all` or compose `device_requests` is configured, and host drivers are installed. For AMD/Intel (Mesa/Vulkan), pass-through `/dev/dri` and Vulkan ICDs as needed.
+- The current server implements a subset of the A1111 API focused on txt2img/img2img. Extend `web/app/main.py` to add more endpoints as required.
+
 ## Notes
 
 - SDLX Needs the VAE: [SDXL VAE FP16 Fix](https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/blob/main/sdxl_vae.safetensors).
