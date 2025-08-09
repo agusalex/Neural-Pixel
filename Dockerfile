@@ -4,7 +4,7 @@ FROM ubuntu:22.04 AS sd-builder
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake git ca-certificates \
-    libvulkan1 libvulkan-dev vulkan-tools shaderc glslang-tools && \
+    libvulkan1 libvulkan-dev vulkan-tools libshaderc-dev glslang-tools && \
     rm -rf /var/lib/apt/lists/*
 WORKDIR /src
 
